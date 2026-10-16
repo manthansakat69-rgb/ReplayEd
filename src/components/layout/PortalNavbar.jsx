@@ -2,8 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../login/Logo';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, ArrowLeftRight, Home } from 'lucide-react';
+import { LogOut, ArrowLeftRight, Home, Sun, Moon } from 'lucide-react';
 import { ROLES } from '../../config/mockUsers';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function PortalNavbar({
   currentRole, // 'student' | 'teacher'
@@ -12,6 +13,7 @@ export default function PortalNavbar({
   onTabChange,
 }) {
   const { user, logout, demoLogin } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -84,6 +86,20 @@ export default function PortalNavbar({
             <span className="font-bold text-white">
               {currentRole === ROLES.STUDENT ? 'Trainer' : 'Student'}
             </span>
+          </button>
+
+          {/* Theme Toggle (Sun / Moon) */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center w-8 h-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white transition shadow-sm"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Theme`}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-indigo-400" />
+            )}
           </button>
 
           {/* User Info Badge */}

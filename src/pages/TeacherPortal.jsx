@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PortalNavbar from '../components/layout/PortalNavbar';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../config/mockUsers';
+import { getTrainerBatch, getReplay } from '../services/api';
 import {
   LayoutDashboard,
   Users,
@@ -20,11 +21,34 @@ import {
   Filter,
   ArrowRight,
   Eye,
+  EyeOff,
+  Clipboard,
+  Monitor,
+  ShieldAlert,
   MessageSquare,
   FileCheck2,
   TrendingDown,
   Sparkles,
+  Zap,
 } from 'lucide-react';
+import { mockProctoringEvents } from '../proctoring/mockEvents';
+
+function getSignalIcon(type) {
+  const t = (type || '').toUpperCase();
+  if (t.includes('LOOK_AWAY') || t.includes('EYE')) return EyeOff;
+  if (t.includes('MULTIPLE_FACES') || t.includes('FACES') || t.includes('USERS')) return Users;
+  if (t.includes('FACE_ABSENT') || t.includes('CAMERA') || t.includes('SHIELD')) return ShieldAlert;
+  if (t.includes('PASTE') || t.includes('COPY') || t.includes('CLIPBOARD')) return Clipboard;
+  if (t.includes('TAB') || t.includes('BLUR') || t.includes('FULLSCREEN') || t.includes('MONITOR')) return Monitor;
+  return AlertTriangle;
+}
+
+function formatMs(ms) {
+  const totalSecs = Math.floor((ms || 0) / 1000);
+  const mins = Math.floor(totalSecs / 60);
+  const secs = totalSecs % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
 
 export default function TeacherPortal() {
   const { user } = useAuth();
@@ -33,10 +57,28 @@ export default function TeacherPortal() {
   // Replay Player State
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState('1x');
-  const [playbackProgress, setPlaybackProgress] = useState(35); // 0 to 100%
+  const [playbackProgress, setPlaybackProgress] = useState(25); // 0 to 100%
   const [selectedStudentForReplay, setSelectedStudentForReplay] = useState('Alex Chen');
   const [trainerFeedback, setTrainerFeedback] = useState('Excellent algorithmic reasoning. Sentinel nodes cleanly implemented.');
   const [verdict, setVerdict] = useState('approved'); // 'approved' | 'flagged'
+
+  // Dynamic Batch & Replay Data from Backend
+  const [replayEvents, setReplayEvents] = useState([]);
+  const [replaySignals, setReplaySignals] = useState([
+    {
+      type: 'even_typing_no_deletions',
+      at: 45000,
+      severity: 'low',
+      note: 'Consistent typing rhythm maintained across problem initialization.',
+    },
+    {
+      type: 'paste_after_tab_switch',
+      at: 185000,
+      severity: 'high',
+      note: 'Paste attempt intercepted 1.2s after returning to tab (380 characters).',
+    },
+  ]);
+  const [activeSignal, setActiveSignal] = useState(null);
 
   // Student directory search & filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,9 +92,9 @@ export default function TeacherPortal() {
     { id: 'replay', label: 'Code Replay & Integrity', icon: Video, badge: 'Hero Tool' },
   ];
 
-  const studentList = [
+  const [studentList, setStudentList] = useState([
     {
-      id: 'STU-2026-042',
+      id: 's1',
       name: 'Alex Chen',
       batch: 'Batch 2026-A',
       modulesDone: '18 / 24',
@@ -61,20 +103,22 @@ export default function TeacherPortal() {
       integrity: '100% Genuine',
       integrityStatus: 'clean',
       latestTask: 'LRU Cache with O(1) Eviction',
+      sessionId: 'sess_demo_alex',
     },
     {
-      id: 'STU-2026-089',
+      id: 's2',
       name: 'Maya Patel',
       batch: 'Batch 2026-B',
       modulesDone: '15 / 24',
       avgScore: '81%',
       weakTopic: 'Concurrency & Locks',
-      integrity: '1 Paste Flagged',
+      integrity: 'Flagged for Human Review',
       integrityStatus: 'flagged',
       latestTask: 'Red-Black Tree Balancing',
+      sessionId: 'sess_demo_maya',
     },
     {
-      id: 'STU-2026-114',
+      id: 's3',
       name: 'Jordan Lee',
       batch: 'Batch 2026-A',
       modulesDone: '19 / 24',
@@ -83,9 +127,10 @@ export default function TeacherPortal() {
       integrity: '100% Genuine',
       integrityStatus: 'clean',
       latestTask: 'Custom C++ Memory Allocator',
+      sessionId: null,
     },
     {
-      id: 'STU-2026-202',
+      id: 's4',
       name: 'Sophia Zhang',
       batch: 'Batch 2026-B',
       modulesDone: '21 / 24',
@@ -94,9 +139,10 @@ export default function TeacherPortal() {
       integrity: '100% Genuine',
       integrityStatus: 'clean',
       latestTask: 'Zero-Copy Ring Buffer',
+      sessionId: null,
     },
     {
-      id: 'STU-2026-245',
+      id: 's5',
       name: 'Rohan Sharma',
       batch: 'Batch 2026-A',
       modulesDone: '12 / 24',
@@ -105,8 +151,90 @@ export default function TeacherPortal() {
       integrity: 'Needs Review',
       integrityStatus: 'review',
       latestTask: 'Topological Sort Scheduler',
+      sessionId: null,
     },
-  ];
+  ]);
+
+  // Load Cohort Batch Summary from Backend API
+  useEffect(() => {
+    async function loadBatch() {
+      try {
+        const data = await getTrainerBatch();
+        if (data && data.students && data.students.length > 0) {
+          setStudentList((prev) =>
+            prev.map((s) => {
+              const apiMatch = data.students.find(
+                (as) => as.name === s.name || as.studentId === s.id || as.email?.includes(s.name.toLowerCase().split(' ')[0])
+              );
+              if (!apiMatch) return s;
+              return {
+                ...s,
+                integrityStatus: apiMatch.integrityStatus || s.integrityStatus,
+                integrity:
+                  apiMatch.integrityStatus === 'flagged'
+                    ? 'Flagged for Human Review'
+                    : apiMatch.integrityStatus === 'review'
+                    ? 'Needs Review'
+                    : '100% Genuine',
+              };
+            })
+          );
+        }
+      } catch (e) {
+        console.warn('[TeacherPortal] Using offline batch data:', e.message);
+      }
+    }
+    loadBatch();
+  }, []);
+
+  // Fetch Replay Data from Backend API on demand
+  useEffect(() => {
+    if (activeTab === 'replay') {
+      const isMaya = selectedStudentForReplay === 'Maya Patel';
+      const targetSession = isMaya ? 'sess_demo_maya' : 'sess_demo_alex';
+      
+      const fallbackSignals = isMaya
+        ? mockProctoringEvents.map((evt) => ({
+            type: evt.type,
+            at: evt.t,
+            severity: evt.type === 'PASTE' || evt.type === 'MULTIPLE_FACES' ? 'high' : 'medium',
+            note: evt.text,
+            meta: evt.meta,
+          }))
+        : [
+            {
+              type: 'even_typing_no_deletions',
+              at: 45000,
+              severity: 'low',
+              note: 'Consistent typing rhythm maintained across problem initialization.',
+            },
+          ];
+
+      getReplay(targetSession)
+        .then((res) => {
+          if (res.events && res.events.length > 0) {
+            setReplayEvents(res.events);
+          }
+          if (res.signals && res.signals.length > 0) {
+            setReplaySignals(res.signals);
+          } else {
+            setReplaySignals(fallbackSignals);
+          }
+        })
+        .catch((e) => {
+          console.warn('[TeacherPortal] Using offline replay signals:', e.message);
+          setReplaySignals(fallbackSignals);
+        });
+    }
+  }, [activeTab, selectedStudentForReplay]);
+
+  const totalDurationMs = 868000; // 14m 28s
+
+  const jumpToSignal = (sig) => {
+    const pct = Math.min(100, Math.max(0, (sig.at / totalDurationMs) * 100));
+    setPlaybackProgress(pct);
+    setActiveSignal(sig);
+  };
 
   const filteredStudents = studentList.filter((s) => {
     const matchesSearch =
@@ -501,18 +629,23 @@ export default function TeacherPortal() {
           <div className="space-y-4">
             {/* Replay Control Bar */}
             <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-xs font-bold uppercase tracking-wider text-white">
                     Keystroke Replay Session Inspector
                   </span>
-                  <span className="text-xs text-zinc-400 font-mono">
-                    • Candidate: <strong className="text-white">{selectedStudentForReplay}</strong>
-                  </span>
                 </div>
-                <div className="text-[11px] text-zinc-400 mt-0.5">
-                  Task: LRU Cache Implementation • Total Recording Duration: 14m 28s
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-zinc-400">Candidate:</span>
+                  <select
+                    value={selectedStudentForReplay}
+                    onChange={(e) => setSelectedStudentForReplay(e.target.value)}
+                    className="bg-zinc-800 text-xs text-zinc-200 px-3 py-1 rounded-xl border border-zinc-700 focus:outline-none"
+                  >
+                    <option value="Alex Chen">Alex Chen (Clean - 100% Genuine)</option>
+                    <option value="Maya Patel">Maya Patel (Flagged for Review - External Paste)</option>
+                  </select>
                 </div>
               </div>
 
@@ -559,18 +692,54 @@ export default function TeacherPortal() {
               </div>
             </div>
 
-            {/* Scrubber Timeline Bar */}
-            <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center gap-4">
-              <span className="text-xs font-mono text-zinc-400">04:18</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={playbackProgress}
-                onChange={(e) => setPlaybackProgress(Number(e.target.value))}
-                className="flex-1 accent-white cursor-pointer h-1.5 bg-zinc-800 rounded-lg"
-              />
-              <span className="text-xs font-mono text-zinc-500">14:28</span>
+            {/* Scrubber Timeline Bar with Jumpable Signal Pins */}
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2">
+              <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                <span>{formatMs((playbackProgress / 100) * totalDurationMs)}</span>
+                <span className="text-[11px] text-zinc-500 font-sans">
+                  Timeline scrubber with jump-to-signal markers (Step 4 &amp; 7)
+                </span>
+                <span>14:28</span>
+              </div>
+
+              <div className="relative flex items-center py-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={playbackProgress}
+                  onChange={(e) => setPlaybackProgress(Number(e.target.value))}
+                  className="w-full accent-white cursor-pointer h-2 bg-zinc-800 rounded-lg relative z-10"
+                />
+
+                {/* Scrubber Signal Markers */}
+                <div className="absolute inset-x-0 h-4 pointer-events-none z-20">
+                  {replaySignals.map((sig, idx) => {
+                    const leftPct = Math.min(98, Math.max(2, (sig.at / totalDurationMs) * 100));
+                    const isHigh = sig.severity === 'high' || sig.type === 'PASTE' || sig.type === 'MULTIPLE_FACES';
+                    const SigIcon = getSignalIcon(sig.type);
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          jumpToSignal(sig);
+                        }}
+                        style={{ left: `${leftPct}%` }}
+                        className={`pointer-events-auto absolute -top-1.5 -translate-x-1/2 w-5 h-5 rounded-full border-2 cursor-pointer transition transform hover:scale-125 flex items-center justify-center ${
+                          isHigh
+                            ? 'bg-rose-500 border-white shadow-md shadow-rose-900 text-white'
+                            : 'bg-zinc-900 border-amber-400 text-amber-400'
+                        }`}
+                        title={`Signal at ${formatMs(sig.at)}: ${sig.type} - ${sig.note}`}
+                      >
+                        <SigIcon className="w-2.5 h-2.5" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* Split Screen: Replay Code Window (Left) + Anomaly Telemetry Log (Right) */}
@@ -612,30 +781,57 @@ export default function TeacherPortal() {
               <div className="lg:col-span-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-4 flex flex-col justify-between space-y-4">
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center justify-between">
-                    <span>Integrity Timeline</span>
-                    <span className="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
-                      High Confidence
+                    <span>Forensic Integrity Signals</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded border font-semibold ${
+                      selectedStudentForReplay === 'Maya Patel'
+                        ? 'bg-rose-950/80 text-rose-300 border-rose-800'
+                        : 'bg-emerald-950/80 text-emerald-400 border border-emerald-800'
+                    }`}>
+                      {selectedStudentForReplay === 'Maya Patel' ? 'Flagged for Review' : 'High Confidence'}
                     </span>
                   </h3>
 
-                  <div className="space-y-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
-                      <div className="font-semibold text-white">00:00 - 02:30</div>
-                      <div className="text-[11px] text-zinc-400">Boilerplate typed steadily at 68 WPM</div>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
-                      <div className="font-semibold text-white">02:31 - 04:15</div>
-                      <div className="text-[11px] text-zinc-400">Think pause (1m 44s) before doubly linked logic</div>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
-                      <div className="font-semibold text-emerald-400 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>0 Block Paste Events</span>
-                      </div>
-                      <div className="text-[11px] text-zinc-400">Zero external clipboard injections</div>
-                    </div>
+                  <div className="space-y-2 text-xs max-h-[260px] overflow-y-auto">
+                    {replaySignals.map((sig, sIdx) => {
+                      const isHigh = sig.severity === 'high' || sig.type === 'PASTE' || sig.type === 'MULTIPLE_FACES';
+                      const SigIcon = getSignalIcon(sig.type);
+                      return (
+                        <div
+                          key={sIdx}
+                          onClick={() => jumpToSignal(sig)}
+                          className={`p-2.5 rounded-xl border cursor-pointer transition hover:border-zinc-500 ${
+                            activeSignal === sig
+                              ? 'bg-zinc-800 border-white'
+                              : isHigh
+                              ? 'bg-rose-950/30 border-rose-800/80'
+                              : 'bg-zinc-900 border-zinc-800'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-mono text-[11px] font-bold text-white flex items-center gap-1.5">
+                              <span className={`w-5 h-5 rounded-md flex items-center justify-center border ${
+                                isHigh
+                                  ? 'bg-rose-950 border-rose-700 text-rose-400'
+                                  : 'bg-zinc-800 border-zinc-700 text-amber-400'
+                              }`}>
+                                <SigIcon className="w-3 h-3" />
+                              </span>
+                              <span>{formatMs(sig.at)}</span>
+                            </span>
+                            <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+                              {sig.type.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 leading-snug">
+                            {sig.note}
+                          </p>
+                          <div className="mt-1 text-[10px] text-zinc-400 flex items-center gap-1">
+                            <Zap className="w-3 h-3 text-amber-400" />
+                            <span>Click to jump scrubber to timestamp</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
