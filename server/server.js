@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { initDb, getDbMode } from './src/db/db.js';
 import { apiRouter } from './src/routes/api.js';
@@ -8,6 +10,10 @@ import { User, Exam, Concept, Question, Mastery } from './src/db/models.js';
 import { runSeed } from './src/seed/seed.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.join(__dirname, '../dist');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -71,6 +77,15 @@ app.get('/api/admin/metrics', async (req, res, next) => {
   } catch (e) {
     next(e);
   }
+});
+
+// Serve static frontend in production if dist directory exists
+app.use(express.static(distPath));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  res.sendFile(path.join(distPath, 'index.html'), (err) => {
+    if (err) next();
+  });
 });
 
 // Central Error Handler
