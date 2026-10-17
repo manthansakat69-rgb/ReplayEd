@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import Logo from '../components/login/Logo';
 import RoleSwitcher from '../components/login/RoleSwitcher';
 import AuthForm from '../components/login/AuthForm';
@@ -27,11 +27,13 @@ function SceneFallback() {
 export default function Login() {
   const { roleParam } = useParams();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   const resolveRole = () => {
+    const fromPath = (location.state?.from?.pathname || '').toLowerCase();
     const p = (roleParam || searchParams.get('role') || '').toLowerCase();
-    if (p === 'teacher' || p === ROLES.TEACHER) return ROLES.TEACHER;
-    if (p === 'admin' || p === ROLES.ADMIN) return ROLES.ADMIN;
+    if (p === 'teacher' || p === ROLES.TEACHER || fromPath.includes('teacher')) return ROLES.TEACHER;
+    if (p === 'admin' || p === ROLES.ADMIN || fromPath.includes('admin')) return ROLES.ADMIN;
     return ROLES.STUDENT;
   };
 
@@ -40,7 +42,7 @@ export default function Login() {
   useEffect(() => {
     const r = resolveRole();
     if (r) setActiveRole(r);
-  }, [roleParam, searchParams]);
+  }, [roleParam, searchParams, location.state]);
 
   return (
     <div className="h-screen max-h-screen w-full flex flex-col lg:flex-row bg-[#0a0a0a] overflow-hidden font-sans">
