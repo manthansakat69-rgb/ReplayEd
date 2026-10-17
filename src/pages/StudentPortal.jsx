@@ -47,6 +47,8 @@ import {
   HelpCircle,
   Video,
   Monitor,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 
 export const PROBLEM_TEMPLATES = {
@@ -139,8 +141,26 @@ export default function StudentPortal() {
     }
   }, [user]);
 
+  // Live WiFi & Network Connectivity Detection
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const handleSaveProfile = (e) => {
     e?.preventDefault();
+    if (!navigator.onLine) {
+      alert('Network Error: WiFi / Internet is offline. Please reconnect to WiFi before saving profile changes.');
+      return;
+    }
     const newName = tempName.trim() || 'Learner';
     const newId = tempId.trim() || 'STU-ID';
     setCandidateName(newName);
@@ -287,6 +307,10 @@ export default function StudentPortal() {
 
   // Start exam workflow with pre-test proctoring verification flow (Steps 1-5)
   const handleStartExamClick = () => {
+    if (!navigator.onLine) {
+      alert('Network Error: WiFi / Internet is offline. An active WiFi connection is required to start your proctored assessment.');
+      return;
+    }
     setIsPreTestOpen(true);
   };
 
@@ -500,6 +524,20 @@ export default function StudentPortal() {
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     <span>Verified Student • {candidateStudentId || user?.studentId || 'STU-ID'}</span>
                   </div>
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+                      isOnline
+                        ? 'bg-emerald-950/40 border-emerald-700/60 text-emerald-300'
+                        : 'bg-rose-950/80 border-rose-700 text-rose-300 animate-pulse'
+                    }`}
+                  >
+                    {isOnline ? (
+                      <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <WifiOff className="w-3.5 h-3.5 text-rose-400" />
+                    )}
+                    <span>{isOnline ? 'WiFi Connected' : 'WiFi Disconnected'}</span>
+                  </div>
                   <button
                     onClick={() => setIsEditingProfile(!isEditingProfile)}
                     className="text-[11px] px-2.5 py-0.5 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
@@ -510,7 +548,19 @@ export default function StudentPortal() {
 
                 {isEditingProfile && (
                   <form onSubmit={handleSaveProfile} className="mb-4 p-4 rounded-2xl bg-zinc-950/90 border border-zinc-700 max-w-lg space-y-3">
-                    <div className="text-xs font-bold text-white uppercase tracking-wider">Update Candidate Identity</div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-bold text-white uppercase tracking-wider">Update Candidate Identity</div>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${isOnline ? 'text-emerald-400 bg-emerald-950/60' : 'text-rose-400 bg-rose-950/60'}`}>
+                        {isOnline ? 'WiFi Online' : 'WiFi Offline'}
+                      </span>
+                    </div>
+
+                    {!isOnline && (
+                      <div className="p-2 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-[11px] flex items-center gap-2">
+                        <WifiOff className="w-3.5 h-3.5 shrink-0" />
+                        <span>WiFi disconnected. You must be connected to WiFi to save identity changes.</span>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[10px] uppercase font-bold text-zinc-400 mb-1">Your Full Name</label>

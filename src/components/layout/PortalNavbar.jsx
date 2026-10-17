@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../login/Logo';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, ArrowLeftRight, Home, Sun, Moon } from 'lucide-react';
+import { LogOut, ArrowLeftRight, Home, Sun, Moon, Wifi, WifiOff } from 'lucide-react';
 import { ROLES } from '../../config/mockUsers';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -16,12 +16,30 @@ export default function PortalNavbar({
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
+  // Live WiFi & Network Connectivity Detection
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
   const handleRoleToggle = () => {
+    if (!navigator.onLine) {
+      alert('Network Error: WiFi / Internet is offline. You cannot switch accounts or roles while disconnected.');
+      return;
+    }
     if (currentRole === ROLES.STUDENT) {
       demoLogin(ROLES.TEACHER);
       navigate('/teacher');
@@ -65,6 +83,10 @@ export default function PortalNavbar({
           {/* Admin Console Quick Link */}
           <button
             onClick={() => {
+              if (!navigator.onLine) {
+                alert('Network Error: WiFi / Internet is offline. Admin Console requires an active connection.');
+                return;
+              }
               demoLogin(ROLES.ADMIN);
               navigate('/admin');
             }}
@@ -87,6 +109,25 @@ export default function PortalNavbar({
               {currentRole === ROLES.STUDENT ? 'Trainer' : 'Student'}
             </span>
           </button>
+
+          {/* Live WiFi Status Indicator Pill */}
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+              isOnline
+                ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/60'
+                : 'bg-rose-950/80 text-rose-300 border-rose-800 animate-pulse'
+            }`}
+            title={isOnline ? 'WiFi / Network: Connected & Online' : 'WiFi Disconnected: No Internet connection'}
+          >
+            {isOnline ? (
+              <Wifi className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            ) : (
+              <WifiOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+            )}
+            <span className="hidden sm:inline text-[11px] font-semibold">
+              {isOnline ? 'WiFi Online' : 'WiFi Offline'}
+            </span>
+          </div>
 
           {/* Theme Toggle (Sun / Moon) */}
           <button

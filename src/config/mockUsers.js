@@ -19,8 +19,8 @@ export const ROLE_CONFIG = [
     demoUser: {
       id: 'usr_stu_001',
       studentId: 'STU-2026-042',
-      name: 'Alex Chen',
-      email: 'student@replayed.edu',
+      name: 'Vaibhavi Gulhane',
+      email: 'vaibhavi.gulhane@gmail.com',
       role: ROLES.STUDENT,
       batch: 'Batch 2026-A',
       stats: { solved: 48, accuracy: '94%', streak: '12 days' },

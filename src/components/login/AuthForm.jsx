@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Wifi, WifiOff, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { login, register } from '../../services/api';
 import { STUDENT_BATCHES, MOCK_USERS_MAP, ROLES } from '../../config/mockUsers';
@@ -29,32 +29,124 @@ export default function AuthForm({ activeRole }) {
   const [errors, setErrors] = useState({});
   const [generalNotice, setGeneralNotice] = useState('');
 
+  // Live WiFi & Network Connectivity Detection
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+  const [wifiNotice, setWifiNotice] = useState('');
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setWifiNotice('WiFi / Network reconnected. You are online.');
+      setTimeout(() => setWifiNotice(''), 3500);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setWifiNotice('WiFi disconnected. An active internet connection is required.');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const isStudent = activeRole === ROLES.STUDENT;
+
+  // Strong Email Validation Helper
+  const validateEmail = (val) => {
+    const trimmed = (val || '').trim();
+    if (!trimmed) {
+      return { valid: false, message: 'Email address is required' };
+    }
+    if (/\s/.test(trimmed)) {
+      return { valid: false, message: 'Email address cannot contain spaces' };
+    }
+    if (!trimmed.includes('@')) {
+      return {
+        valid: false,
+        message: 'Email must contain @ and a domain (e.g. yourname@gmail.com)',
+      };
+    }
+    const parts = trimmed.split('@');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      return {
+        valid: false,
+        message: 'Invalid email format. Format: username@gmail.com',
+      };
+    }
+    const [userPart, domainPart] = parts;
+    if (userPart.length < 3) {
+      return { valid: false, message: 'Email username prefix must be at least 3 characters' };
+    }
+    if (!domainPart.includes('.')) {
+      return {
+        valid: false,
+        message: `Incomplete domain "@${domainPart}". Example: yourname@gmail.com`,
+      };
+    }
+    const domainParts = domainPart.split('.');
+    const tld = domainParts[domainParts.length - 1];
+    if (!tld || tld.length < 2) {
+      return { valid: false, message: 'Invalid top-level domain. Example: @gmail.com' };
+    }
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailPattern.test(trimmed)) {
+      return {
+        valid: false,
+        message: 'Please enter a valid email address (e.g. yourname@gmail.com)',
+      };
+    }
+
+    return { valid: true, message: '' };
+  };
+
+  // Password Strength Calculation
+  const getPasswordStrength = (pass) => {
+    if (!pass) return { score: 0, label: 'Empty', color: 'bg-zinc-700', text: 'text-zinc-500' };
+    let score = 0;
+    if (pass.length >= 6) score += 1;
+    if (pass.length >= 8) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[A-Z]/.test(pass) && /[a-z]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+
+    if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-rose-500', text: 'text-rose-500' };
+    if (score <= 3) return { score: 2, label: 'Medium', color: 'bg-amber-400', text: 'text-amber-500' };
+    return { score: 3, label: 'Strong', color: 'bg-emerald-500', text: 'text-emerald-500' };
+  };
 
   // Validate form
   const validate = () => {
     const newErrors = {};
 
-    if (!emailOrUsername.trim()) {
-      newErrors.emailOrUsername = isStudent
-        ? 'Student ID or email is required'
-        : 'Email or username is required';
-    } else if (
-      emailOrUsername.includes('@') &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrUsername.trim())
-    ) {
-      newErrors.emailOrUsername = 'Please enter a valid email address';
+    // 1. WiFi & Network Connectivity Check
+    if (!navigator.onLine) {
+      newErrors.form = 'No WiFi or Internet connection detected. Please connect to WiFi/Internet to log in.';
     }
 
+    // 2. Strong Email Validation
+    const emailResult = validateEmail(emailOrUsername);
+    if (!emailResult.valid) {
+      newErrors.emailOrUsername = emailResult.message;
+    }
+
+    // 3. Password Validation
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Password must be at least 6 characters (8+ recommended)';
     }
 
+    // 4. Register Mode Fields
     if (mode === 'register') {
       if (!fullName.trim()) {
         newErrors.fullName = 'Full name is required';
+      } else if (fullName.trim().length < 3) {
+        newErrors.fullName = 'Please enter your full name (minimum 3 characters)';
       }
       if (password !== confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
@@ -69,6 +161,14 @@ export default function AuthForm({ activeRole }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setGeneralNotice('');
+
+    // Strict WiFi Connection Check
+    if (!navigator.onLine) {
+      setErrors({
+        form: 'Network Error: WiFi / Internet is offline. Please check your WiFi connection and try again.',
+      });
+      return;
+    }
 
     if (!validate()) return;
 
@@ -101,14 +201,26 @@ export default function AuthForm({ activeRole }) {
     }
   };
 
-  // Quick Demo Access
+  // Quick Demo Access (with strict WiFi verification)
   const handleDemoAccess = () => {
+    if (!navigator.onLine) {
+      setErrors({
+        form: 'Network Error: WiFi / Internet is offline. You cannot access accounts without an active WiFi connection.',
+      });
+      return;
+    }
     demoLogin(activeRole);
     navigate(`/${activeRole}`);
   };
 
-  // Social Sign-In Handler (Google / Apple ID)
+  // Social Sign-In Handler (Google / Apple ID with strict WiFi verification)
   const handleSocialAuth = async (provider) => {
+    if (!navigator.onLine) {
+      setErrors({
+        form: 'Network Error: WiFi / Internet is offline. Google and Apple sign-in require an active WiFi connection.',
+      });
+      return;
+    }
     setSocialLoading(provider);
     await new Promise((resolve) => setTimeout(resolve, 400));
     demoLogin(activeRole);
@@ -120,7 +232,7 @@ export default function AuthForm({ activeRole }) {
   const handleQuickFill = () => {
     const mock = MOCK_USERS_MAP[activeRole];
     if (mock) {
-      setEmailOrUsername(isStudent ? mock.studentId || mock.email : mock.email);
+      setEmailOrUsername(mock.email || 'vaibhavi.gulhane@gmail.com');
       setPassword('password123');
       setErrors({});
     }
@@ -180,6 +292,42 @@ export default function AuthForm({ activeRole }) {
         </button>
       </div>
 
+      {/* Live WiFi & Network Connectivity Bar */}
+      <div
+        className={`flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold border mb-3 transition-all ${
+          isOnline
+            ? 'bg-zinc-900/80 border-zinc-700 text-zinc-200'
+            : 'bg-rose-950/80 border-rose-700 text-rose-200 animate-pulse'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {isOnline ? (
+            <Wifi className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          ) : (
+            <WifiOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+          )}
+          <span>
+            {isOnline ? 'Network: WiFi Connected & Online' : 'No WiFi / Internet Disconnected'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'
+            }`}
+          />
+          <span className="text-[10px] font-mono text-zinc-400 uppercase">
+            {isOnline ? 'Online' : 'Offline'}
+          </span>
+        </div>
+      </div>
+
+      {wifiNotice && (
+        <div className="mb-3 rounded-lg bg-zinc-800 p-2 text-xs text-zinc-200 border border-zinc-700">
+          {wifiNotice}
+        </div>
+      )}
+
       {generalNotice && (
         <div className="mb-3 rounded-lg bg-zinc-100 p-2 text-xs text-zinc-700 border border-zinc-200">
           {generalNotice}
@@ -187,8 +335,9 @@ export default function AuthForm({ activeRole }) {
       )}
 
       {errors.form && (
-        <div className="mb-3 rounded-lg bg-zinc-100 p-2 text-xs text-zinc-900 border border-zinc-300 font-medium">
-          {errors.form}
+        <div className="mb-3 rounded-lg bg-rose-50 p-2.5 text-xs text-rose-800 border border-rose-300 font-medium flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{errors.form}</span>
         </div>
       )}
 
@@ -210,7 +359,7 @@ export default function AuthForm({ activeRole }) {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Alex Chen"
+                  placeholder="e.g. Vaibhavi Gulhane"
                   value={fullName}
                   onChange={(e) => {
                     setFullName(e.target.value);
@@ -264,46 +413,76 @@ export default function AuthForm({ activeRole }) {
           )}
         </AnimatePresence>
 
-        {/* Email, Username OR Student ID */}
+        {/* Email Address with Strong @gmail.com & Domain Validation */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-              {isStudent ? 'Student ID or Email' : 'Email or Username'}
+              Email Address (Domain Required: @gmail.com)
             </label>
-            {mode === 'signin' && (
-              <button
-                type="button"
-                onClick={handleQuickFill}
-                className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 transition-colors"
-                title="Fill sample demo credentials"
-              >
-                Auto-fill sample
-              </button>
+            <div className="flex items-center gap-1.5">
+              {!emailOrUsername.includes('@') && emailOrUsername.trim().length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmailOrUsername((prev) => `${prev.trim()}@gmail.com`);
+                    if (errors.emailOrUsername) setErrors({ ...errors, emailOrUsername: null });
+                  }}
+                  className="text-[10px] font-bold text-zinc-800 hover:text-black bg-zinc-200 hover:bg-zinc-300 px-2 py-0.5 rounded-md border border-zinc-300 transition shadow-xs"
+                  title="Click to append @gmail.com"
+                >
+                  + @gmail.com
+                </button>
+              )}
+              {mode === 'signin' && (
+                <button
+                  type="button"
+                  onClick={handleQuickFill}
+                  className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 transition-colors"
+                  title="Fill sample demo credentials"
+                >
+                  Auto-fill sample
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="relative">
+            <input
+              type="email"
+              placeholder="e.g. yourname@gmail.com"
+              value={emailOrUsername}
+              onChange={(e) => {
+                setEmailOrUsername(e.target.value);
+                if (errors.emailOrUsername) setErrors({ ...errors, emailOrUsername: null });
+              }}
+              className={`w-full rounded-xl border bg-white px-3 py-2 text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 transition duration-150 focus:outline-none focus:ring-1 focus:ring-zinc-800 focus:border-zinc-800 ${
+                errors.emailOrUsername
+                  ? 'border-rose-600 ring-1 ring-rose-600'
+                  : validateEmail(emailOrUsername).valid
+                  ? 'border-emerald-600'
+                  : 'border-zinc-300'
+              }`}
+            />
+            {validateEmail(emailOrUsername).valid && (
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              </div>
             )}
           </div>
-          <input
-            type="text"
-            placeholder={
-              isStudent
-                ? 'STU-2026-042 or student@replayed.edu'
-                : activeRole === ROLES.TEACHER
-                ? 'trainer@replayed.edu'
-                : 'admin@replayed.edu'
-            }
-            value={emailOrUsername}
-            onChange={(e) => {
-              setEmailOrUsername(e.target.value);
-              if (errors.emailOrUsername) setErrors({ ...errors, emailOrUsername: null });
-            }}
-            className={`w-full rounded-xl border bg-white px-3 py-2 text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 transition duration-150 focus:outline-none focus:ring-1 focus:ring-zinc-800 focus:border-zinc-800 ${
-              errors.emailOrUsername
-                ? 'border-zinc-900 ring-1 ring-zinc-900'
-                : 'border-zinc-300'
-            }`}
-          />
-          {errors.emailOrUsername && (
-            <p className="mt-0.5 text-[10px] text-zinc-700 font-medium">
-              {errors.emailOrUsername}
+
+          {errors.emailOrUsername ? (
+            <p className="mt-1 text-[10px] text-rose-600 font-medium flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 shrink-0" />
+              <span>{errors.emailOrUsername}</span>
+            </p>
+          ) : validateEmail(emailOrUsername).valid ? (
+            <p className="mt-0.5 text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3 shrink-0" />
+              <span>Valid email format verified (@gmail.com / domain valid)</span>
+            </p>
+          ) : (
+            <p className="mt-0.5 text-[10px] text-zinc-400">
+              Must include valid domain format like <span className="font-semibold text-zinc-600">@gmail.com</span> or educational email.
             </p>
           )}
         </div>
@@ -348,6 +527,34 @@ export default function AuthForm({ activeRole }) {
               {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             </button>
           </div>
+
+          {/* Dynamic Password Strength Indicator */}
+          {password && (
+            <div className="mt-1.5 space-y-1">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="text-zinc-500 font-medium">Password Strength:</span>
+                <span className={`font-bold ${getPasswordStrength(password).text}`}>
+                  {getPasswordStrength(password).label}
+                </span>
+              </div>
+              <div className="h-1 w-full bg-zinc-200 rounded-full overflow-hidden flex gap-1">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    getPasswordStrength(password).color
+                  }`}
+                  style={{
+                    width:
+                      getPasswordStrength(password).score === 1
+                        ? '33%'
+                        : getPasswordStrength(password).score === 2
+                        ? '66%'
+                        : '100%',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           {errors.password && (
             <p className="mt-0.5 text-[10px] text-zinc-700 font-medium">{errors.password}</p>
           )}
@@ -397,11 +604,16 @@ export default function AuthForm({ activeRole }) {
         {/* Primary Action Button (Strict Black to Dark-Grey Gradient) */}
         <button
           type="submit"
-          disabled={loading}
-          className="relative w-full mt-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#111111] to-[#3f3f46] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-150 hover:from-[#1a1a1a] hover:to-[#52525b] hover:shadow-lg active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 disabled:opacity-75 disabled:cursor-not-allowed"
+          disabled={loading || !isOnline}
+          className={`relative w-full mt-1 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 ${
+            !isOnline
+              ? 'bg-zinc-700 cursor-not-allowed opacity-75'
+              : 'bg-gradient-to-r from-[#111111] to-[#3f3f46] hover:from-[#1a1a1a] hover:to-[#52525b] hover:shadow-lg active:scale-[0.99] disabled:opacity-75 disabled:cursor-not-allowed'
+          }`}
         >
           {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-300" />}
-          <span>{getButtonText()}</span>
+          {!isOnline && <WifiOff className="w-3.5 h-3.5 text-rose-300" />}
+          <span>{!isOnline ? 'WiFi Disconnected — Reconnect to Login' : getButtonText()}</span>
         </button>
 
         {/* Demo Mode Link */}

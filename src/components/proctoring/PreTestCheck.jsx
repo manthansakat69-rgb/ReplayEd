@@ -14,6 +14,8 @@ import {
   Sun,
   Crosshair,
   Monitor,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { useCamera } from '../../proctoring/useCamera';
 import { estimateGaze, estimateHeadPose, calculateCalibrationThresholds } from '../../proctoring/gazeUtils';
@@ -45,6 +47,20 @@ export default function PreTestCheck({
 
   // Step 1: Consent
   const [consentAgreed, setConsentAgreed] = useState(false);
+
+  // Live WiFi & Network Connectivity Detection
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Camera Lifecycle Hook
   const {
@@ -1052,6 +1068,32 @@ export default function PreTestCheck({
                     </span>
                   </div>
 
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {isOnline ? (
+                        <Wifi className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <WifiOff className="w-4 h-4 text-rose-400 shrink-0" />
+                      )}
+                      <div>
+                        <span className="font-semibold text-white">WiFi &amp; Network Telemetry:</span>
+                        <span className="text-zinc-400 ml-1">
+                          {isOnline ? 'Online — Real-time event sync active' : 'Offline — Disconnected from network'}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded flex items-center gap-1 ${
+                        isOnline
+                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                          : 'bg-rose-950 text-rose-400 border border-rose-800 animate-pulse'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                      {isOnline ? 'ONLINE' : 'OFFLINE'}
+                    </span>
+                  </div>
+
                   <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-3">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>Any looking away or tab switches are logged as neutral evidence signals for trainer review.</span>
@@ -1068,6 +1110,10 @@ export default function PreTestCheck({
 
                   <button
                     onClick={() => {
+                      if (!navigator.onLine) {
+                        alert('Network Error: WiFi / Internet connection is offline. An active connection is required to conduct and submit proctored sessions.');
+                        return;
+                      }
                       if (onComplete) {
                         onComplete({
                           stream: stream || activeStreamRef.current,
