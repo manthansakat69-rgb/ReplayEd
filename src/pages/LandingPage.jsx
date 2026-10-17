@@ -22,6 +22,9 @@ import {
   MapPin,
   MessageSquare,
   Send,
+  Code2,
+  Cpu,
+  Fingerprint,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../config/mockUsers";
@@ -31,7 +34,11 @@ import { ROLES } from "../config/mockUsers";
  *
  * Exact spotlight crowd video hero + Google Fonts (Archivo Black, Bricolage Grotesque, DM Sans)
  * Connected interactive portals (Student, Trainer, Admin, Auth)
- * Executive Team & Faculty Mentors (Dr. Vaibhavi Gulhane, Dr. Soham Gadhave, Dr. Pranjali Gaikwad, Dr. Gandharva Kolhe)
+ * Engineering Core Team:
+ *  - Er. Vaibhavi Gulhane (Lead AI Architect & Full-Stack Systems Lead)
+ *  - Er. Soham Gadhave (Cloud Infrastructure & Kernel Security Lead)
+ *  - Er. Pranjali Gaikwad (ML Systems & NLP Viva Voce Specialist)
+ *  - Er. Gandharva Kolhe (Keystroke Forensics & Real-Time Telemetry Lead)
  * High-fidelity Dark Footer with Interactive Stay-Informed Newsletter & Social Links
  */
 
@@ -105,7 +112,7 @@ export default function ReplayedLanding({
   const [emailSub, setEmailSub] = useState("");
   const [subSuccess, setSubSuccess] = useState(false);
 
-  // Consult modal/toast state
+  // Engineer consult / contact modal state
   const [consultModal, setConsultModal] = useState(null);
 
   // Navigation Handlers connecting all platform modules
@@ -640,7 +647,7 @@ export default function ReplayedLanding({
                 <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-1 transition-transform" />
               </div>
               <p className="text-xs text-zinc-500 leading-relaxed mt-2">
-                Adaptive OOP curriculum, Monaco code editor, gaze calibration, and live camera verification.
+                Adaptive Java OOP curriculum, Monaco code editor, gaze calibration, and live camera verification.
               </p>
             </div>
             <span className="text-xs font-bold text-zinc-900 mt-4 inline-flex items-center gap-1 group-hover:underline">
@@ -723,16 +730,16 @@ export default function ReplayedLanding({
       </section>
 
       {/* ========================================================
-          EXECUTIVE TEAM & FACULTY CONSULTANTS
-          (Matching the user's provided medivance team showcase)
+          ENGINEERING & ARCHITECTURE BOARD
+          (Updated: "Er." titles, Software Engineering experience, Tech developer portraits)
           ======================================================== */}
       <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-zinc-200 text-zinc-800 inline-block mb-2">
-            Research &amp; Engineering Faculty
+            Engineering &amp; Architecture Board
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight">
-            Meet the Minds Behind ReplayEd
+            Meet the Engineers Behind ReplayEd
           </h2>
           <p className="text-sm text-zinc-600 mt-2">
             Pioneering adaptive AI, sandboxed security kernels, and forensic keystroke telemetry.
@@ -740,174 +747,178 @@ export default function ReplayedLanding({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Consultant 1: Dr. Vaibhavi Gulhane */}
+          {/* Engineer 1: Er. Vaibhavi Gulhane */}
           <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
             <div>
               <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
                 <img
-                  src="./team-vaibhavi.png"
-                  alt="Dr. Vaibhavi Gulhane"
+                  src="./team-vaibhavi.jpg"
+                  alt="Er. Vaibhavi Gulhane"
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-5">
                 <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 mb-2">
-                  Neurologist &amp; Cognitive AI
+                  Lead AI Architect &amp; Systems Lead
                 </span>
                 <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                  Dr. Vaibhavi Gulhane
+                  Er. Vaibhavi Gulhane
                 </h3>
-                <p className="text-xs font-semibold text-zinc-500">10+ Years Experience</p>
+                <p className="text-xs font-semibold text-zinc-500">6+ Years Experience</p>
 
                 {/* Rating */}
                 <div className="flex items-center gap-1 my-2.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   ))}
-                  <span className="text-xs font-bold text-zinc-800 ml-1">5.0 (210 Reviews)</span>
+                  <span className="text-xs font-bold text-zinc-800 ml-1">5.0 (240 Reviews)</span>
                 </div>
 
                 <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
-                  &ldquo;Pioneering the cognitive load and adaptive knowledge tracking engine for student retention.&rdquo;
+                  &ldquo;Spearheaded ReplayEd&apos;s cognitive adaptive learning engine, dynamic OOP knowledge tracking, and student concept mastery pipelines.&rdquo;
                 </p>
               </div>
             </div>
 
             <div className="p-5 pt-0">
               <button
-                onClick={() => setConsultModal("Dr. Vaibhavi Gulhane")}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+                onClick={() => setConsultModal("Er. Vaibhavi Gulhane")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm flex items-center justify-center gap-1.5"
               >
-                Book Consult
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Connect Profile</span>
               </button>
             </div>
           </div>
 
-          {/* Consultant 2: Dr. Soham Gadhave */}
+          {/* Engineer 2: Er. Soham Gadhave */}
           <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
             <div>
               <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
                 <img
-                  src="./team-soham.png"
-                  alt="Dr. Soham Gadhave"
+                  src="./team-soham.jpg"
+                  alt="Er. Soham Gadhave"
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-5">
                 <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-2">
-                  Cardiologist &amp; Sandbox Security
+                  Cloud Infrastructure &amp; Security Lead
                 </span>
                 <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                  Dr. Soham Gadhave
+                  Er. Soham Gadhave
                 </h3>
-                <p className="text-xs font-semibold text-zinc-500">15+ Years Experience</p>
+                <p className="text-xs font-semibold text-zinc-500">5+ Years Experience</p>
 
                 {/* Rating */}
                 <div className="flex items-center gap-1 my-2.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   ))}
-                  <span className="text-xs font-bold text-zinc-800 ml-1">4.8 (95 Reviews)</span>
+                  <span className="text-xs font-bold text-zinc-800 ml-1">4.9 (185 Reviews)</span>
                 </div>
 
                 <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
-                  &ldquo;Architect of the isolated sandbox ensuring 512MB RAM and sub-5s secure execution limits.&rdquo;
+                  &ldquo;Engineered the low-latency 512MB RAM isolated sandboxed execution environment and multi-container cluster security.&rdquo;
                 </p>
               </div>
             </div>
 
             <div className="p-5 pt-0">
               <button
-                onClick={() => setConsultModal("Dr. Soham Gadhave")}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+                onClick={() => setConsultModal("Er. Soham Gadhave")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm flex items-center justify-center gap-1.5"
               >
-                Book Consult
+                <Cpu className="w-3.5 h-3.5" />
+                <span>Connect Profile</span>
               </button>
             </div>
           </div>
 
-          {/* Consultant 3: Dr. Pranjali Gaikwad */}
+          {/* Engineer 3: Er. Pranjali Gaikwad */}
           <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
             <div>
               <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
                 <img
-                  src="./team-pranjali.png"
-                  alt="Dr. Pranjali Gaikwad"
+                  src="./team-pranjali.jpg"
+                  alt="Er. Pranjali Gaikwad"
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-5">
                 <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200 mb-2">
-                  Gynecologist &amp; AI Viva Voce
+                  ML Systems &amp; NLP Viva Specialist
                 </span>
                 <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                  Dr. Pranjali Gaikwad
+                  Er. Pranjali Gaikwad
                 </h3>
-                <p className="text-xs font-semibold text-zinc-500">12+ Years Experience</p>
+                <p className="text-xs font-semibold text-zinc-500">5+ Years Experience</p>
 
                 {/* Rating */}
                 <div className="flex items-center gap-1 my-2.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   ))}
-                  <span className="text-xs font-bold text-zinc-800 ml-1">4.9 (128 Reviews)</span>
+                  <span className="text-xs font-bold text-zinc-800 ml-1">4.9 (156 Reviews)</span>
                 </div>
 
                 <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
-                  &ldquo;Lead designer of the AI Viva Voce system evaluating student semantic understanding.&rdquo;
+                  &ldquo;Architected the multi-modal AI Viva Voce model analyzing semantic syntax trees, code explanation depth, and conceptual clarity.&rdquo;
                 </p>
               </div>
             </div>
 
             <div className="p-5 pt-0">
               <button
-                onClick={() => setConsultModal("Dr. Pranjali Gaikwad")}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+                onClick={() => setConsultModal("Er. Pranjali Gaikwad")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm flex items-center justify-center gap-1.5"
               >
-                Book Consult
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Connect Profile</span>
               </button>
             </div>
           </div>
 
-          {/* Consultant 4: Dr. Gandharva Kolhe */}
+          {/* Engineer 4: Er. Gandharva Kolhe */}
           <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
             <div>
               <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
                 <img
-                  src="./team-gandharva.png"
-                  alt="Dr. Gandharva Kolhe"
+                  src="./team-gandharva.jpg"
+                  alt="Er. Gandharva Kolhe"
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-5">
                 <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
-                  Pediatrician &amp; Keystroke Forensics
+                  Keystroke Forensics &amp; Real-Time Telemetry
                 </span>
                 <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                  Dr. Gandharva Kolhe
+                  Er. Gandharva Kolhe
                 </h3>
-                <p className="text-xs font-semibold text-zinc-500">8+ Years Experience</p>
+                <p className="text-xs font-semibold text-zinc-500">4+ Years Experience</p>
 
                 {/* Rating */}
                 <div className="flex items-center gap-1 my-2.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   ))}
-                  <span className="text-xs font-bold text-zinc-800 ml-1">4.9 (160 Reviews)</span>
+                  <span className="text-xs font-bold text-zinc-800 ml-1">4.8 (170 Reviews)</span>
                 </div>
 
                 <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
-                  &ldquo;Engineered real-time keystroke dynamics, paste anomaly flags, and gaze tracking.&rdquo;
+                  &ldquo;Designed the sub-millisecond keystroke event streaming pipeline, anti-cheating heuristic monitors, and real-time proctoring telemetry.&rdquo;
                 </p>
               </div>
             </div>
 
             <div className="p-5 pt-0">
               <button
-                onClick={() => setConsultModal("Dr. Gandharva Kolhe")}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+                onClick={() => setConsultModal("Er. Gandharva Kolhe")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm flex items-center justify-center gap-1.5"
               >
-                Book Consult
+                <Fingerprint className="w-3.5 h-3.5" />
+                <span>Connect Profile</span>
               </button>
             </div>
           </div>
@@ -915,7 +926,7 @@ export default function ReplayedLanding({
       </section>
 
       {/* ========================================================
-          DARK FOOTER (Matching the user's provided medivance footer)
+          DARK FOOTER (High-Fidelity Engineering & Tech Footer)
           ======================================================== */}
       <footer className="w-full bg-[#0d1627] text-white pt-14 pb-8 px-4 sm:px-6 border-t border-zinc-800">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-zinc-800/80">
@@ -930,18 +941,21 @@ export default function ReplayedLanding({
               </span>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed mb-5 max-w-sm">
-              ReplayEd is revolutionizing interactive coding assessment and clinical education.
-              Book consultations, track adaptive mastery, replay keystroke telemetry, and verify student integrity on demand.
+              ReplayEd is revolutionizing interactive coding assessment.
+              Connect with leading software architects, track adaptive mastery, replay keystroke telemetry, and verify student integrity on demand.
             </p>
             {/* Social Icons */}
             <div className="flex items-center gap-2.5">
               <a
-                href="#facebook"
-                onClick={(e) => e.preventDefault()}
-                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-blue-600 flex items-center justify-center text-zinc-300 hover:text-white transition"
-                aria-label="Facebook"
+                href="#github"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.open("https://github.com/manthansakat69-rgb/ReplayEd", "_blank");
+                }}
+                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-zinc-700 flex items-center justify-center text-zinc-300 hover:text-white transition"
+                aria-label="GitHub"
               >
-                <span className="text-xs font-bold">f</span>
+                <span className="text-xs font-bold">git</span>
               </a>
               <a
                 href="#twitter"
@@ -952,20 +966,12 @@ export default function ReplayedLanding({
                 <span className="text-xs font-bold">t</span>
               </a>
               <a
-                href="#instagram"
-                onClick={(e) => e.preventDefault()}
-                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-pink-600 flex items-center justify-center text-zinc-300 hover:text-white transition"
-                aria-label="Instagram"
-              >
-                <span className="text-xs font-bold">in</span>
-              </a>
-              <a
                 href="#linkedin"
                 onClick={(e) => e.preventDefault()}
-                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-blue-500 flex items-center justify-center text-zinc-300 hover:text-white transition"
+                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-blue-600 flex items-center justify-center text-zinc-300 hover:text-white transition"
                 aria-label="LinkedIn"
               >
-                <span className="text-xs font-bold">li</span>
+                <span className="text-xs font-bold">in</span>
               </a>
             </div>
           </div>
@@ -1035,15 +1041,15 @@ export default function ReplayedLanding({
             <ul className="space-y-3 text-xs text-zinc-400">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                <span>100 Health &amp; Tech Way, CA 94107</span>
+                <span>100 EduTech Innovation Way, CA 94107</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-blue-500 shrink-0" />
-                <span>+1 (800) 555-CARE (2273)</span>
+                <span>+1 (800) 555-REPLAY (7375)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-blue-500 shrink-0" />
-                <span>support@replayed.edu / medivance.health</span>
+                <span>support@replayed.edu</span>
               </li>
             </ul>
           </div>
@@ -1054,7 +1060,7 @@ export default function ReplayedLanding({
               Stay Informed
             </h3>
             <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
-              Subscribe for updates on health advice, clinical benchmarks, and new AI features.
+              Subscribe for updates on automated grading, telemetry AI, and new sandbox features.
             </p>
 
             <form onSubmit={handleSubscribe} className="space-y-2.5">
@@ -1085,25 +1091,25 @@ export default function ReplayedLanding({
 
         {/* Bottom Bar */}
         <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3">
-          <p>&copy; {new Date().getFullYear()} ReplayEd Health Tech Inc. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} ReplayEd Engineering Inc. All rights reserved.</p>
           <div className="flex items-center gap-4 text-zinc-400">
             <span className="hover:text-white transition cursor-pointer">Privacy Policy</span>
             <span className="hover:text-white transition cursor-pointer">Terms of Service</span>
-            <span className="hover:text-white transition cursor-pointer">HIPAA &amp; FERPA Compliance</span>
+            <span className="hover:text-white transition cursor-pointer">Academic Integrity Compliance</span>
           </div>
         </div>
       </footer>
 
       {/* Floating Chat / Support Badge */}
       <div
-        onClick={() => setConsultModal("Clinical Support Desk")}
+        onClick={() => setConsultModal("ReplayEd Engineering Support")}
         className="fixed bottom-6 right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-full shadow-2xl cursor-pointer hover:scale-110 transition-transform flex items-center justify-center"
-        title="Live Support Chat"
+        title="Live Engineering Chat"
       >
         <MessageSquare className="w-5 h-5" />
       </div>
 
-      {/* Consult Confirmation Modal */}
+      {/* Engineer Contact Modal */}
       {consultModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-zinc-200 shadow-2xl text-center">
@@ -1111,10 +1117,10 @@ export default function ReplayedLanding({
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <h3 className="text-base font-extrabold text-zinc-950 mb-1">
-              Consultation Scheduled
+              Engineering Profile Connected
             </h3>
             <p className="text-xs text-zinc-600 mb-4 leading-relaxed">
-              Your consultation request with <strong className="text-zinc-900">{consultModal}</strong> has been logged in ReplayEd Telehealth &amp; Academic registry.
+              Your connection request with <strong className="text-zinc-900">{consultModal}</strong> has been logged in the ReplayEd Developer &amp; Architecture Network.
             </p>
             <button
               onClick={() => setConsultModal(null)}
