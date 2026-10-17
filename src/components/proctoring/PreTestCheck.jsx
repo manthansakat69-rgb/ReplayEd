@@ -32,8 +32,16 @@ export default function PreTestCheck({
   onComplete,
   onCancel,
   examTitle = 'LRU Cache Implementation Assessment',
+  initialCandidateName = '',
+  initialStudentId = '',
 }) {
   const [currentStep, setCurrentStep] = useState(1); // 1: Consent, 2: Permission, 3: Face Check, 4: Calibration, 5: Rules
+
+  // User Candidate Info & Assessment Customization
+  const [candidateName, setCandidateName] = useState(initialCandidateName || '');
+  const [candidateId, setCandidateId] = useState(initialStudentId || '');
+  const [selectedTopic, setSelectedTopic] = useState('LRU Cache Implementation (O(1) Operations)');
+  const [customPrompt, setCustomPrompt] = useState('');
 
   // Step 1: Consent
   const [consentAgreed, setConsentAgreed] = useState(false);
@@ -520,6 +528,77 @@ export default function PreTestCheck({
                   </div>
                 </div>
 
+                {/* Candidate Information & Assessment Inputs */}
+                <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      Candidate Details &amp; Test Selection
+                    </span>
+                    <span className="text-[10px] text-zinc-400">Customizable</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-zinc-400 mb-1">
+                        Candidate Full Name
+                      </label>
+                      <input
+                        type="text"
+                        value={candidateName}
+                        onChange={(e) => setCandidateName(e.target.value)}
+                        placeholder="e.g. Vaibhavi Gulhane"
+                        className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-zinc-400 mb-1">
+                        Student ID / Roll No.
+                      </label>
+                      <input
+                        type="text"
+                        value={candidateId}
+                        onChange={(e) => setCandidateId(e.target.value)}
+                        placeholder="e.g. STU-2026-042"
+                        className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-zinc-400 mb-1">
+                      Select Coding Challenge Topic
+                    </label>
+                    <select
+                      value={selectedTopic}
+                      onChange={(e) => setSelectedTopic(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-400"
+                    >
+                      <option value="LRU Cache Implementation (O(1) Operations)">LRU Cache Implementation (Hard)</option>
+                      <option value="Two Sum with Hash Map Lookup">Two Sum &amp; Hash Maps (Easy)</option>
+                      <option value="Reverse a Linked List In-Place">Reverse Linked List (Medium)</option>
+                      <option value="Binary Search Lower Bound">Binary Search (Medium)</option>
+                      <option value="Custom Coding Problem">Custom Coding Problem (Type your own below)</option>
+                    </select>
+                  </div>
+
+                  {selectedTopic === 'Custom Coding Problem' && (
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-zinc-400 mb-1">
+                        Enter Custom Problem Prompt / Instructions
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        placeholder="Describe your custom coding task here..."
+                        className="w-full rounded-xl border border-zinc-700 bg-zinc-950 p-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* Explicit Checkbox Required */}
                 <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 cursor-pointer select-none">
                   <input
@@ -960,6 +1039,19 @@ export default function PreTestCheck({
                     <span>A small mirrored camera preview remains visible in the corner.</span>
                   </div>
 
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] text-zinc-500 uppercase font-mono">Candidate &amp; Assessment Setup</div>
+                      <div className="text-xs font-bold text-white mt-0.5">
+                        {candidateName || 'Candidate'} • <span className="font-mono text-zinc-400">{candidateId || 'STU-PROCTOR'}</span>
+                      </div>
+                      <div className="text-[11px] text-amber-400 mt-0.5">Assessment: {selectedTopic}</div>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+                      READY
+                    </span>
+                  </div>
+
                   <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-3">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>Any looking away or tab switches are logged as neutral evidence signals for trainer review.</span>
@@ -983,6 +1075,10 @@ export default function PreTestCheck({
                             horizontalLookAwayRatio: 0.38,
                             verticalLookAwayRatio: 0.35,
                           },
+                          candidateName: (candidateName || '').trim(),
+                          candidateId: (candidateId || '').trim(),
+                          selectedTopic,
+                          customPrompt: (customPrompt || '').trim(),
                         });
                       }
                     }}

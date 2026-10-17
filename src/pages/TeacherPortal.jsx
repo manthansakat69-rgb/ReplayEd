@@ -92,68 +92,95 @@ export default function TeacherPortal() {
     { id: 'replay', label: 'Code Replay & Integrity', icon: Video, badge: 'Hero Tool' },
   ];
 
-  const [studentList, setStudentList] = useState([
-    {
-      id: 's1',
-      name: 'Alex Chen',
-      batch: 'Batch 2026-A',
-      modulesDone: '18 / 24',
-      avgScore: '94%',
-      weakTopic: 'Dynamic Programming',
-      integrity: '100% Genuine',
-      integrityStatus: 'clean',
-      latestTask: 'LRU Cache with O(1) Eviction',
-      sessionId: 'sess_demo_alex',
-    },
-    {
-      id: 's2',
-      name: 'Maya Patel',
-      batch: 'Batch 2026-B',
-      modulesDone: '15 / 24',
-      avgScore: '81%',
-      weakTopic: 'Concurrency & Locks',
-      integrity: 'Flagged for Human Review',
-      integrityStatus: 'flagged',
-      latestTask: 'Red-Black Tree Balancing',
-      sessionId: 'sess_demo_maya',
-    },
-    {
-      id: 's3',
-      name: 'Jordan Lee',
-      batch: 'Batch 2026-A',
-      modulesDone: '19 / 24',
-      avgScore: '91%',
-      weakTopic: 'Graph BFS/DFS',
-      integrity: '100% Genuine',
-      integrityStatus: 'clean',
-      latestTask: 'Custom C++ Memory Allocator',
-      sessionId: null,
-    },
-    {
-      id: 's4',
-      name: 'Sophia Zhang',
-      batch: 'Batch 2026-B',
-      modulesDone: '21 / 24',
-      avgScore: '98%',
-      weakTopic: 'None (Advanced)',
-      integrity: '100% Genuine',
-      integrityStatus: 'clean',
-      latestTask: 'Zero-Copy Ring Buffer',
-      sessionId: null,
-    },
-    {
-      id: 's5',
-      name: 'Rohan Sharma',
-      batch: 'Batch 2026-A',
-      modulesDone: '12 / 24',
-      avgScore: '69%',
-      weakTopic: 'Recursion Call Stacks',
-      integrity: 'Needs Review',
-      integrityStatus: 'review',
-      latestTask: 'Topological Sort Scheduler',
-      sessionId: null,
-    },
-  ]);
+  const [studentList, setStudentList] = useState(() => {
+    const defaults = [
+      {
+        id: 's1',
+        name: 'Alex Chen',
+        batch: 'Batch 2026-A',
+        modulesDone: '18 / 24',
+        avgScore: '94%',
+        weakTopic: 'Dynamic Programming',
+        integrity: '100% Genuine',
+        integrityStatus: 'clean',
+        latestTask: 'LRU Cache with O(1) Eviction',
+        sessionId: 'sess_demo_alex',
+      },
+      {
+        id: 's2',
+        name: 'Maya Patel',
+        batch: 'Batch 2026-B',
+        modulesDone: '15 / 24',
+        avgScore: '81%',
+        weakTopic: 'Concurrency & Locks',
+        integrity: 'Flagged for Human Review',
+        integrityStatus: 'flagged',
+        latestTask: 'Red-Black Tree Balancing',
+        sessionId: 'sess_demo_maya',
+      },
+      {
+        id: 's3',
+        name: 'Jordan Lee',
+        batch: 'Batch 2026-A',
+        modulesDone: '19 / 24',
+        avgScore: '91%',
+        weakTopic: 'Graph BFS/DFS',
+        integrity: '100% Genuine',
+        integrityStatus: 'clean',
+        latestTask: 'Custom C++ Memory Allocator',
+        sessionId: null,
+      },
+      {
+        id: 's4',
+        name: 'Sophia Zhang',
+        batch: 'Batch 2026-B',
+        modulesDone: '21 / 24',
+        avgScore: '98%',
+        weakTopic: 'None (Advanced)',
+        integrity: '100% Genuine',
+        integrityStatus: 'clean',
+        latestTask: 'Zero-Copy Ring Buffer',
+        sessionId: null,
+      },
+      {
+        id: 's5',
+        name: 'Rohan Sharma',
+        batch: 'Batch 2026-A',
+        modulesDone: '12 / 24',
+        avgScore: '69%',
+        weakTopic: 'Recursion Call Stacks',
+        integrity: 'Needs Review',
+        integrityStatus: 'review',
+        latestTask: 'Topological Sort Scheduler',
+        sessionId: null,
+      },
+    ];
+
+    try {
+      const saved = localStorage.getItem('replayed_auth_session');
+      if (saved) {
+        const u = JSON.parse(saved);
+        if (u?.name && u.name !== 'Alex Chen') {
+          return [
+            {
+              id: u.id || 'curr_user',
+              name: u.name,
+              batch: u.batch || 'Batch 2026-A',
+              modulesDone: '20 / 24',
+              avgScore: '92%',
+              weakTopic: 'Concurrency Primitives',
+              integrity: '100% Genuine (Proctored)',
+              integrityStatus: 'clean',
+              latestTask: 'Assessment Task (Live Session)',
+              sessionId: 'sess_live_student',
+            },
+            ...defaults,
+          ];
+        }
+      }
+    } catch (_) {}
+    return defaults;
+  });
 
   // Load Cohort Batch Summary from Backend API
   useEffect(() => {
@@ -643,8 +670,11 @@ export default function TeacherPortal() {
                     onChange={(e) => setSelectedStudentForReplay(e.target.value)}
                     className="bg-zinc-800 text-xs text-zinc-200 px-3 py-1 rounded-xl border border-zinc-700 focus:outline-none"
                   >
-                    <option value="Alex Chen">Alex Chen (Clean - 100% Genuine)</option>
-                    <option value="Maya Patel">Maya Patel (Flagged for Review - External Paste)</option>
+                    {studentList.map((st) => (
+                      <option key={st.id} value={st.name}>
+                        {st.name} ({st.integrity || st.integrityStatus})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

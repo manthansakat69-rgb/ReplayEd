@@ -21,16 +21,24 @@ export async function login({ email, password, role }) {
     console.warn('[API Notice] Backend server unreachable, using client session fallback.');
   }
 
-  // Graceful fallback for offline demo
+  const cleanEmail = (email || '').trim();
+  const isEmail = cleanEmail.includes('@');
+  const rawName = isEmail ? cleanEmail.split('@')[0] : cleanEmail;
+  const formattedName = rawName
+    ? rawName.charAt(0).toUpperCase() + rawName.slice(1).replace(/[._-]/g, ' ')
+    : 'Candidate';
+  const customStudentId = !isEmail && cleanEmail ? cleanEmail : `STU-${Date.now().toString().slice(-4)}`;
+
+  // Graceful fallback using exact credentials entered by the user
   return {
     success: true,
     token: `jwt_fallback_${Date.now()}`,
     user: {
-      id: email === 'student@replayed.edu' ? 's1' : 't1',
-      name: email.includes('@') ? email.split('@')[0] : email,
-      email,
+      id: cleanEmail || `usr_${Date.now()}`,
+      name: formattedName,
+      email: isEmail ? cleanEmail : `${cleanEmail.toLowerCase()}@replayed.edu`,
       role: role || 'student',
-      studentId: role === 'student' ? 'STU-2026-042' : null,
+      studentId: role === 'student' ? customStudentId : null,
       batch: 'Batch 2026-A',
     },
   };
@@ -56,11 +64,11 @@ export async function register({ name, email, role, studentId, batch }) {
     success: true,
     token: `jwt_fallback_${Date.now()}`,
     user: {
-      id: `usr_${Date.now()}`,
-      name: name || 'Learner',
-      email,
+      id: email || `usr_${Date.now()}`,
+      name: (name || '').trim() || 'Learner',
+      email: (email || '').trim(),
       role: role || 'student',
-      studentId: studentId || 'STU-2026-042',
+      studentId: (studentId || '').trim() || (role === 'student' ? `STU-${Date.now().toString().slice(-4)}` : null),
       batch: batch || 'Batch 2026-A',
     },
   };

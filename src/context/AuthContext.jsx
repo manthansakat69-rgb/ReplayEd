@@ -52,6 +52,13 @@ export function AuthProvider({ children }) {
   };
 
   /**
+   * Update current user profile fields in session & storage
+   */
+  const updateUser = (updatedFields) => {
+    setUser((prev) => (prev ? { ...prev, ...updatedFields } : updatedFields));
+  };
+
+  /**
    * Log out and clear session
    */
   const logout = () => {
@@ -65,6 +72,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user?.role,
     loginUser,
     demoLogin,
+    updateUser,
     logout,
     loading,
     setLoading,

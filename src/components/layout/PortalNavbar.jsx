@@ -106,10 +106,10 @@ export default function PortalNavbar({
           <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span className="font-medium text-zinc-300">
-              {user?.name || (currentRole === ROLES.STUDENT ? 'Alex Chen' : 'Dr. Elena Vance')}
+              {user?.name || (currentRole === ROLES.STUDENT ? 'Student Learner' : 'Trainer Faculty')}
             </span>
             <span className="text-zinc-500">
-              {user?.studentId ? `(${user.studentId})` : currentRole === ROLES.STUDENT ? '(Batch 2026-A)' : '(Trainer)'}
+              {user?.studentId ? `(${user.studentId})` : currentRole === ROLES.STUDENT ? '(Enrolled)' : '(Trainer)'}
             </span>
           </div>
 
