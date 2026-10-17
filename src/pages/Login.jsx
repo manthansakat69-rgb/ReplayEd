@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { useParams, useSearchParams, useLocation } from 'react-router-dom';
+import { useParams, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../components/login/Logo';
 import RoleSwitcher from '../components/login/RoleSwitcher';
 import AuthForm from '../components/login/AuthForm';
@@ -25,6 +25,7 @@ function SceneFallback() {
 }
 
 export default function Login() {
+  const navigate = useNavigate();
   const { roleParam } = useParams();
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -120,9 +121,16 @@ export default function Login() {
           <AuthForm activeRole={activeRole} />
         </div>
 
-        {/* Subtle Institutional Copyright */}
-        <div className="mt-3 text-center text-[10px] text-zinc-400">
-          &copy; {new Date().getFullYear()} ReplayEd Inc. Adaptive Coding & Assessment Engine.
+        {/* Navigation & Institutional Copyright */}
+        <div className="mt-3.5 flex items-center justify-between w-full max-w-[420px] px-2 text-[11px] text-zinc-500">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="hover:text-zinc-950 font-semibold transition cursor-pointer flex items-center gap-1"
+          >
+            ← Back to Landing Page
+          </button>
+          <span>&copy; {new Date().getFullYear()} ReplayEd Inc.</span>
         </div>
       </section>
     </div>

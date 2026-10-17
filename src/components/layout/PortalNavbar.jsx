@@ -131,9 +131,18 @@ export default function PortalNavbar({
             </>
           )}
 
-          {/* Student-Only Quick Links: Top Rankers + About Us */}
+          {/* Student-Only Quick Links: Home + Top Rankers + About Us */}
           {currentRole === ROLES.STUDENT && (
             <>
+              <button
+                onClick={() => navigate('/')}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 transition"
+                title="Back to Landing Page"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Home</span>
+              </button>
+
               <button
                 onClick={() => onTabChange && onTabChange('leaderboard')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${

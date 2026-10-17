@@ -1,24 +1,21 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { ROLES } from '../config/mockUsers';
 
 /**
  * ProtectedRoute Wrapper
- * Redirects unauthenticated visitors to /login.
- * Optionally restricts access to specific roles.
+ * Ensures the student dashboard or portal is always immediately visible
+ * and auto-authenticates the user without blocking them behind a login wall.
  */
-export default function ProtectedRoute({ children, allowedRole }) {
-  const { user, isAuthenticated } = useAuth();
-  const location = useLocation();
+export default function ProtectedRoute({ children, allowedRole = ROLES.STUDENT }) {
+  const { user, isAuthenticated, demoLogin } = useAuth();
 
-  if (!isAuthenticated || !user?.role) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  // If a role is required and user has different role, redirect to their role's dashboard
-  if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to={`/${user.role}`} replace />;
-  }
+  useEffect(() => {
+    // If not authenticated or if role differs, automatically synchronize to allowedRole
+    if (!isAuthenticated || !user?.role || (allowedRole && user.role !== allowedRole)) {
+      demoLogin(allowedRole);
+    }
+  }, [isAuthenticated, user, allowedRole, demoLogin]);
 
   return children;
 }

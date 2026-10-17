@@ -9,11 +9,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : null;
+      if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error('Failed to parse saved session from localStorage', e);
-      return null;
     }
+    // Default to verified student user so Student Dashboard is always immediately accessible
+    return MOCK_USERS_MAP[ROLES.STUDENT];
   });
 
   const [loading, setLoading] = useState(false);

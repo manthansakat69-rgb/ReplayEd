@@ -502,18 +502,26 @@ export default function ReplayedLanding({
             </div>
           </div>
 
-          {/* Sign In & Register Navigation */}
+          {/* Sign In, Register & Direct Student Dashboard Navigation */}
           <nav className="flex items-center gap-2 sm:gap-3">
             <button
+              onClick={handleGoStudent}
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition shadow-xs cursor-pointer"
+            >
+              <GraduationCap className="w-4 h-4 text-blue-600" />
+              <span>Student Dashboard</span>
+            </button>
+
+            <button
               onClick={() => handleGoSignIn("student")}
-              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition cursor-pointer"
+              className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition cursor-pointer"
             >
               Sign In
             </button>
 
             <button
               onClick={() => handleGoRegister("student")}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm cursor-pointer"
             >
               <span>Register</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -563,6 +571,15 @@ export default function ReplayedLanding({
           </h1>
 
           <div ref={loginsRef} className="logins-container">
+            <button
+              onClick={handleGoStudent}
+              className="custom-btn"
+              style={{ background: "#2563eb", color: "#ffffff", borderColor: "#1d4ed8" }}
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>Open Student Dashboard</span>
+            </button>
+
             <button
               onClick={() => handleGoSignIn("student")}
               className="custom-btn dark"

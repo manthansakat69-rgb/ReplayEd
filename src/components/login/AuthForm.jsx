@@ -266,6 +266,36 @@ export default function AuthForm({ activeRole }) {
 
   return (
     <div className="w-full mt-4">
+      {/* 1-Click Instant Access to Student Dashboard Banner */}
+      <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white shadow-md flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-white/20 backdrop-blur-xs shrink-0">
+            <ShieldCheck className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <div className="text-xs font-black tracking-tight flex items-center gap-1.5">
+              <span>Student Dashboard</span>
+              <span className="text-[9px] font-bold bg-amber-400 text-zinc-950 px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                Instant
+              </span>
+            </div>
+            <div className="text-[10px] text-blue-100 font-medium">
+              Open directly without typing credentials
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            demoLogin(ROLES.STUDENT);
+            navigate('/student');
+          }}
+          className="shrink-0 px-3 py-1.5 rounded-xl bg-white text-blue-700 hover:bg-blue-50 text-xs font-black transition shadow-sm cursor-pointer hover:scale-105 active:scale-95"
+        >
+          Open Dashboard →
+        </button>
+      </div>
+
       {/* Tabs: Sign In / Create Account */}
       <div className="flex border-b border-zinc-200 mb-3.5">
         <button
