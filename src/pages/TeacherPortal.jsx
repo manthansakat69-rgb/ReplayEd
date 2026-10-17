@@ -69,16 +69,39 @@ export default function TeacherPortal() {
       type: 'even_typing_no_deletions',
       at: 45000,
       severity: 'low',
-      note: 'Consistent typing rhythm maintained across problem initialization.',
+      note: 'Consistent typing cadence registered (74 WPM, standard character variance).',
     },
     {
-      type: 'paste_after_tab_switch',
+      type: 'TAB_SWITCH',
+      at: 112000,
+      severity: 'medium',
+      note: 'Browser Visibility API signal: Tab blur / window switch detected at 01:52 (Candidate out of test tab for 3.8s).',
+    },
+    {
+      type: 'PASTE',
       at: 185000,
       severity: 'high',
-      note: 'Paste attempt intercepted 1.2s after returning to tab (380 characters).',
+      note: 'AI / Rule-Based Signal: 50 lines external code paste block intercepted at timestamp 03:05.',
     },
   ]);
   const [activeSignal, setActiveSignal] = useState(null);
+
+  // Live student submission and AI Viva records from localStorage
+  const [liveCandidateSubmission, setLiveCandidateSubmission] = useState(() => {
+    try {
+      const saved = localStorage.getItem('replayed_student_submission');
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return null;
+  });
+
+  const [liveCandidateViva, setLiveCandidateViva] = useState(() => {
+    try {
+      const saved = localStorage.getItem('replayed_viva_answers');
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return null;
+  });
 
   // Student directory search & filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -611,6 +634,46 @@ export default function TeacherPortal() {
               </div>
             </div>
 
+            {/* Java OOP Adaptive Learning Track (Feature 1) */}
+            <div className="rounded-2xl border border-indigo-900/60 bg-indigo-950/20 p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">
+                    Feature 1: Java OOP Adaptive Knowledge Tracking (Bayesian Model)
+                  </div>
+                  <h3 className="text-base font-bold text-white">
+                    Learner Knowledge State &amp; Remediation History
+                  </h3>
+                </div>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-950 border border-indigo-700 text-indigo-300">
+                  Live Adaptive Pacing
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+                  <div className="text-xs text-zinc-400">Classes &amp; Objects</div>
+                  <div className="text-xl font-bold text-white mt-1">95%</div>
+                  <span className="text-[10px] text-emerald-400 font-semibold">Mastered</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+                  <div className="text-xs text-zinc-400">Inheritance &amp; Subclassing</div>
+                  <div className="text-xl font-bold text-emerald-400 mt-1">85%</div>
+                  <span className="text-[10px] text-emerald-400 font-semibold">Remediated from 48% (Weak)</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+                  <div className="text-xs text-zinc-400">Polymorphism &amp; Dispatch</div>
+                  <div className="text-xl font-bold text-white mt-1">72%</div>
+                  <span className="text-[10px] text-zinc-400 font-semibold">Next Recommended Topic</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+                  <div className="text-xs text-zinc-400">Dynamic Programming</div>
+                  <div className="text-xl font-bold text-amber-400 mt-1">48%</div>
+                  <span className="text-[10px] text-amber-400 font-semibold">Weak Topic Flagged</span>
+                </div>
+              </div>
+            </div>
+
             <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 sm:p-8 space-y-5">
               {[
                 { concept: 'Hash Tables & O(1) Lookups', mastery: 96, studentsStruggling: 3 },
@@ -906,6 +969,129 @@ export default function TeacherPortal() {
                     className="w-full py-2 rounded-xl bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition"
                   >
                     Save & Submit Evaluation
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Anti-Cheating Evidence Signal Notice (Feature 2) */}
+            <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-800/60 text-xs space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-300 font-bold uppercase tracking-wider text-[11px]">
+                <ShieldAlert className="w-4 h-4 text-amber-400" />
+                <span>Anti-Cheating Policy &amp; Signal Interpretation (Feature 2)</span>
+              </div>
+              <p className="text-zinc-300 leading-relaxed text-xs">
+                <strong>महत्त्वाचं:</strong> Tab switch किंवा मोठा paste (उदा. 50 lines) म्हणजे cheating झाल्याचा थेट पुरावा नाही. Browser मधून प्रत्येक बाहेरील application किंवा AI tool चा वापर १००% विश्वसनीयपणे detect करता येत नाही. म्हणून system संशयास्पद signals दाखवते; अंतिम निर्णय शिक्षकाने (Teacher) घ्यावा.
+              </p>
+            </div>
+
+            {/* Candidate AI Viva Voce Assessment & Code Similarity Inspector (Feature 4) */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5 sm:p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800 gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span className="font-bold text-sm text-white">
+                      AI Viva Voce Inspection &amp; Code Semantic Similarity (Feature 4)
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    विद्यार्थ्याच्या submitted code वरील ३ प्रश्नांची उत्तरे आणि AI analysis (LLM API + Submitted Code).
+                  </p>
+                </div>
+                <span className="text-xs px-3 py-1 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold">
+                  AI Alignment: 92% (High Semantic Match)
+                </span>
+              </div>
+
+              {/* Submitted Code Preview */}
+              <div className="p-3.5 rounded-xl bg-[#0d0d10] border border-zinc-800 font-mono text-xs space-y-1.5">
+                <div className="flex items-center justify-between text-zinc-500 text-[11px]">
+                  <span>Candidate Submitted Code Preview ({selectedStudentForReplay})</span>
+                  <span>Language: JavaScript / Java</span>
+                </div>
+                <pre className="max-h-[120px] overflow-y-auto text-zinc-300 text-[11px] leading-relaxed p-2 rounded bg-zinc-950/80">
+{liveCandidateSubmission?.code || `class LRUCache {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.cache = new Map();
+    }
+    get(key) {
+        if (!this.cache.has(key)) return -1;
+        const val = this.cache.get(key);
+        this.cache.delete(key);
+        this.cache.set(key, val);
+        return val;
+    }
+}`}
+                </pre>
+              </div>
+
+              {/* 3 Viva Answers Evaluated */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    <span>प्रश्न १: Output &amp; Complexity</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 italic">"या code चं output काय असेल?"</p>
+                  <p className="text-xs text-zinc-200 leading-relaxed bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
+                    {liveCandidateViva?.answers?.q1 ||
+                      'Returns -1 on cache miss, updates item recency on get/put. O(1) average time complexity with O(capacity) auxiliary memory.'}
+                  </p>
+                  <div className="text-[10px] text-emerald-400 font-semibold">AI Evaluation: 9/10 (Accurate complexity bounds)</div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    <span>प्रश्न २: Approach &amp; Data Structures</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 italic">"तू हा approach का निवडला?"</p>
+                  <p className="text-xs text-zinc-200 leading-relaxed bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
+                    {liveCandidateViva?.answers?.q2 ||
+                      'Used hash map with doubly linked list to achieve strict O(1) eviction and lookup instead of O(N) array scans.'}
+                  </p>
+                  <div className="text-[10px] text-emerald-400 font-semibold">AI Evaluation: 9/10 (Clear algorithmic rationale)</div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    <span>प्रश्न ३: Error Diagnostics &amp; Edge Cases</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 italic">"या code मध्ये error आल्यास तू कसा fix करशील?"</p>
+                  <p className="text-xs text-zinc-200 leading-relaxed bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
+                    {liveCandidateViva?.answers?.q3 ||
+                      'Use sentinel dummy head/tail to prevent null pointer exceptions during eviction, and validate non-negative capacity.'}
+                  </p>
+                  <div className="text-[10px] text-emerald-400 font-semibold">AI Evaluation: 8/10 (Solid defensive programming)</div>
+                </div>
+              </div>
+
+              {/* Teacher Decision Controls */}
+              <div className="flex flex-col sm:flex-row items-center justify-between p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 gap-3">
+                <span className="text-xs text-zinc-400">
+                  Teacher Final Authority: AI Viva score serves as an understanding indicator; final decision rests with the teacher.
+                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => {
+                      setVerdict('approved');
+                      alert(`Submission and AI Viva for ${selectedStudentForReplay} approved as genuine!`);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition"
+                  >
+                    Confirm &amp; Approve
+                  </button>
+                  <button
+                    onClick={() => {
+                      setVerdict('flagged');
+                      alert(`Candidate ${selectedStudentForReplay} scheduled for 10-minute live oral viva interview.`);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-200 font-semibold text-xs hover:bg-zinc-700 transition"
+                  >
+                    Request Live Oral Interview
                   </button>
                 </div>
               </div>
