@@ -623,6 +623,10 @@ export default function StudentPortal() {
     [addTimelineEvent]
   );
 
+  // Screen & Monitor Recording Capture State
+  const [screenStream, setScreenStream] = useState(null);
+  const [isScreenRecording, setIsScreenRecording] = useState(false);
+
   // Exit from Lockout back to Student Dashboard
   const handleExitToDashboardFromLock = useCallback(() => {
     setIsExamActive(false);
@@ -742,10 +746,6 @@ export default function StudentPortal() {
     onSignal: handleEvidenceSignal,
     questionRef: questionContainerRef,
   });
-
-  // Screen & Monitor Recording Capture State
-  const [screenStream, setScreenStream] = useState(null);
-  const [isScreenRecording, setIsScreenRecording] = useState(false);
 
   const handleToggleScreenRecording = async () => {
     if (isScreenRecording && screenStream) {

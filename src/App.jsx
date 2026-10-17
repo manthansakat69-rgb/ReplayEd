@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
+import ReplayedLanding from './ReplayedLanding';
 import Login from './pages/Login';
 import StudentPortal from './pages/StudentPortal';
 import TeacherPortal from './pages/TeacherPortal';
@@ -12,7 +13,9 @@ export default function App() {
   return (
     <Routes>
       {/* 1. Public Landing Page */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<ReplayedLanding />} />
+      {/* Previous full landing page (faculty, footer etc.) kept here */}
+      <Route path="/home" element={<LandingPage />} />
 
       {/* 2. Public Shared Login / Signup System */}
       <Route path="/login" element={<Login />} />

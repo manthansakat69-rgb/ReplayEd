@@ -24,6 +24,23 @@ function SceneFallback() {
   );
 }
 
+/**
+ * If the 3D scene fails (no WebGL, blocked network, etc.) show the gradient
+ * fallback instead of crashing the whole login page to a blank screen.
+ */
+class SceneBoundary extends React.Component {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (this.state.failed) {
+      return <div className="absolute inset-0 bg-[#0a0a0a]" />;
+    }
+    return this.props.children;
+  }
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const { roleParam } = useParams();
@@ -65,9 +82,9 @@ export default function Login() {
 
         {/* 3D Scene Layer (Hidden on screens under 1024px for strict performance) */}
         <div className="absolute inset-0 z-[1]">
-          <Suspense fallback={<SceneFallback />}>
+          <SceneBoundary><Suspense fallback={<SceneFallback />}>
             <Scene />
-          </Suspense>
+          </Suspense></SceneBoundary>
         </div>
 
         {/* Top-Left Branding Overlay */}

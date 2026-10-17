@@ -1,7 +1,8 @@
-"use client";
-
 import { BookOpen, GraduationCap, RotateCcw } from "lucide-react";
 import React, { useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import { ROLES } from "./config/mockUsers";
 
 /**
  * ReplayEd landing.
@@ -47,10 +48,16 @@ type Props = {
 };
 
 export default function ReplayedLanding({
-  videoSrc = "/crowd-loop.mp4",
+  videoSrc = `${import.meta.env.BASE_URL}crowd-loop.mp4`,
   studentHref = "/login/student",
   teacherHref = "/login/teacher",
 }: Props) {
+  const navigate = useNavigate();
+  const { demoLogin } = useAuth();
+  const openDashboard = (role: string, path: string) => {
+    demoLogin(role);
+    navigate(path);
+  };
   const videoRef = useRef<HTMLVideoElement>(null);
   const crowdRef = useRef<HTMLDivElement>(null);
   const litRef = useRef<HTMLDivElement>(null);
@@ -144,6 +151,14 @@ export default function ReplayedLanding({
     const onResize = () => {
       if (hero) chooseHero();
     };
+    // Safety net: if the video can't play, still reveal the logo, tagline and buttons.
+    timers.push(
+      setTimeout(() => {
+        brandRef.current?.classList.add("rp-on");
+        tagRef.current?.classList.add("rp-on");
+        loginsRef.current?.classList.add("rp-on");
+      }, 6000),
+    );
     v.addEventListener("pause", onPause);
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("resize", onResize);
@@ -251,18 +266,34 @@ export default function ReplayedLanding({
         </h1>
 
         <div ref={loginsRef} className="rp-logins pointer-events-none flex flex-wrap justify-center gap-3">
-          <a
-            href={studentHref}
+          <Link
+            to={studentHref}
             className="flex items-center gap-2 rounded-full border-[1.5px] border-[#0d0d0d] bg-[#0d0d0d] px-7 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg"
           >
             <GraduationCap className="h-4 w-4" /> Student Login
-          </a>
-          <a
-            href={teacherHref}
+          </Link>
+          <Link
+            to={teacherHref}
             className="flex items-center gap-2 rounded-full border-[1.5px] border-[#0d0d0d] bg-white px-7 py-3 text-sm font-semibold text-[#0d0d0d] transition hover:-translate-y-0.5 hover:shadow-lg"
           >
             <BookOpen className="h-4 w-4" /> Teacher Login
-          </a>
+          </Link>
+          <div className="flex w-full flex-wrap justify-center gap-2 pt-1">
+            {[
+              ["Student Dashboard", ROLES.STUDENT, "/student"],
+              ["Teacher Dashboard", ROLES.TEACHER, "/teacher"],
+              ["Admin Console", ROLES.ADMIN, "/admin"],
+            ].map(([label, role, path]) => (
+              <button
+                key={path}
+                type="button"
+                onClick={() => openDashboard(role, path)}
+                className="rounded-full border border-[#0d0d0d]/30 bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#0d0d0d] backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
