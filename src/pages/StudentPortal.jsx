@@ -49,6 +49,17 @@ import {
   Monitor,
   Wifi,
   WifiOff,
+  Award,
+  Trophy,
+  ExternalLink,
+  ShieldCheck,
+  Layers,
+  Cpu,
+  Check,
+  Eye,
+  Users,
+  BarChart3,
+  Info,
 } from 'lucide-react';
 
 export const PROBLEM_TEMPLATES = {
@@ -143,6 +154,85 @@ function search(nums, target) {
     
 }
 `,
+  'Java: Classes & Objects (Bank Account)': `// Topic: Classes & Objects
+public class BankAccount {
+    private String accountNumber;
+    private double balance;
+
+    public BankAccount(String accountNumber, double initialBalance) {
+        this.accountNumber = accountNumber;
+        this.balance = initialBalance;
+    }
+
+    public boolean deposit(double amount) {
+        if (amount <= 0) return false;
+        this.balance += amount;
+        return true;
+    }
+
+    public boolean withdraw(double amount) {
+        if (amount <= 0 || amount > this.balance) return false;
+        this.balance -= amount;
+        return true;
+    }
+
+    public double getBalance() {
+        return this.balance;
+    }
+}
+`,
+  'Java: Abstraction & Encapsulation (Payment Gateway)': `// Topic: Abstraction & Encapsulation
+abstract class PaymentGateway {
+    protected String merchantId;
+
+    public PaymentGateway(String merchantId) {
+        this.merchantId = merchantId;
+    }
+
+    // Abstract method: sub-classes must implement
+    public abstract boolean processPayment(double amount);
+}
+
+public class SecureATM extends PaymentGateway {
+    private double vaultCash;
+
+    public SecureATM(String merchantId, double initialVault) {
+        super(merchantId);
+        this.vaultCash = initialVault;
+    }
+
+    @Override
+    public boolean processPayment(double amount) {
+        if (amount <= 0 || amount > vaultCash) return false;
+        vaultCash -= amount;
+        return true;
+    }
+}
+`,
+  'Java: Polymorphic Shape Calculator': `// Topic: Polymorphism & Dynamic Dispatch
+abstract class Shape {
+    public abstract double calculateArea();
+    public abstract double calculatePerimeter();
+}
+
+class Circle extends Shape {
+    private double radius;
+    public Circle(double radius) { this.radius = radius; }
+    @Override
+    public double calculateArea() { return Math.PI * radius * radius; }
+    @Override
+    public double calculatePerimeter() { return 2 * Math.PI * radius; }
+}
+
+class Rectangle extends Shape {
+    private double width, height;
+    public Rectangle(double w, double h) { this.width = w; this.height = h; }
+    @Override
+    public double calculateArea() { return width * height; }
+    @Override
+    public double calculatePerimeter() { return 2 * (width + height); }
+}
+`,
   'Custom Coding Problem': `/**
  * Custom Coding Problem Solution
  * Write your logic below:
@@ -161,9 +251,11 @@ export const JAVA_OOP_CONCEPTS = [
   {
     id: 'classes_objects',
     name: 'Classes & Objects',
-    category: 'Java OOP',
+    category: 'Java OOP Core',
     initialScore: 88,
     status: 'Mastered',
+    keywords: ['class', 'new', 'this', 'constructors', 'heap allocation'],
+    description: 'Blueprint architecture, state encapsulation, object identity, and memory allocation in JVM Heap.',
     quizQuestion: {
       prompt: 'In Java, what happens during the execution of: `Dog dog = new Dog();`?',
       options: [
@@ -173,97 +265,237 @@ export const JAVA_OOP_CONCEPTS = [
         'Stack frame is permanently reserved for the object instance',
       ],
       correctIndex: 0,
-      explanation: 'The new operator allocates heap memory for the instance and invokes the constructor.',
+      explanation: 'The new operator allocates heap memory for the instance, sets default values, and invokes the constructor.',
     },
     practiceQuestion: {
-      prompt: 'Targeted Practice: Which keyword is used within an instance method or constructor to reference the invoking object in Java?',
+      prompt: 'Targeted Practice: Which keyword is used within an instance method to reference the current invoking object in Java?',
       options: ['this', 'super', 'self', 'instance'],
       correctIndex: 0,
-      explanation: 'In Java, `this` refers to the current instance of the class.',
+      explanation: 'In Java, `this` refers to the current invoking instance of the class.',
+    },
+  },
+  {
+    id: 'abstraction',
+    name: 'Abstraction',
+    category: 'Java OOP Core',
+    initialScore: 74,
+    status: 'In Progress',
+    keywords: ['abstract', 'interface', 'default methods', 'hiding details'],
+    description: 'Hiding internal system complexities and exposing only essential declarative contracts through abstract classes and interfaces.',
+    quizQuestion: {
+      prompt: 'Which statement accurately describes an `abstract class` in Java?',
+      options: [
+        'It cannot be directly instantiated with `new` and can contain both abstract and concrete methods',
+        'It must contain only public static final constants and zero method implementations',
+        'It cannot have any constructors defined in its class body',
+        'It automatically forces all inheriting subclasses to be declared final',
+      ],
+      correctIndex: 0,
+      explanation: 'An abstract class cannot be instantiated directly and can provide partial implementation alongside abstract method definitions.',
+    },
+    practiceQuestion: {
+      prompt: 'Targeted Practice: Can an interface in Java 8+ contain concrete methods with implementation bodies?',
+      options: [
+        'Yes, using `default` or `static` method declarations',
+        'No, Java interfaces strictly forbid method bodies under all circumstances',
+        'Only if the interface extends an abstract class',
+        'Only within anonymous inner classes',
+      ],
+      correctIndex: 0,
+      explanation: 'Java 8 introduced default and static methods allowing interfaces to have method bodies without breaking backward compatibility.',
+    },
+  },
+  {
+    id: 'encapsulation',
+    name: 'Encapsulation',
+    category: 'Java OOP Core',
+    initialScore: 78,
+    status: 'In Progress',
+    keywords: ['private', 'getters/setters', 'data hiding', 'immutability'],
+    description: 'Bundling data variables and methods into a single protective unit, enforcing access control with private fields and validated accessors.',
+    quizQuestion: {
+      prompt: 'What is the primary design motivation for making class fields `private` with public getter/setter accessors?',
+      options: [
+        'Data hiding: protects object internal state and allows validation logic before state mutation',
+        'Improves JVM bytecode interpretation speed by 40%',
+        'Mandatory requirement by Java compiler for bytecode serialization',
+        'Enables direct static linking across packages',
+      ],
+      correctIndex: 0,
+      explanation: 'Encapsulation restricts direct unauthorized field modification, ensuring object invariants and security validations remain intact.',
+    },
+    practiceQuestion: {
+      prompt: 'Targeted Practice: How can you create a completely immutable class in Java?',
+      options: [
+        'Declare the class final, fields private final, omit setters, and return defensive copies of mutable objects',
+        'Mark all methods with the synchronized modifier',
+        'Extend java.lang.ImmutableObject',
+        'Declare all fields as public volatile',
+      ],
+      correctIndex: 0,
+      explanation: 'Immutable classes have final class/fields, no mutating setters, and return defensive copies for internal mutable state.',
     },
   },
   {
     id: 'inheritance',
     name: 'Inheritance & Subclassing',
-    category: 'Java OOP',
+    category: 'Java OOP Core',
     initialScore: 48,
     status: 'Weak Topic',
+    keywords: ['extends', 'super()', 'IS-A relationship', 'code reuse'],
+    description: 'Deriving child classes from parent classes for behavioral reusability, constructor delegation, and specialized extensions.',
     quizQuestion: {
       prompt: 'In Java, when class `Employee` extends class `Person`, which rule applies to constructor chaining?',
       options: [
-        'The super() call to the parent constructor must be the first line in the subclass constructor',
+        'The `super()` call to the parent constructor must be the first statement in the subclass constructor',
         'Subclasses automatically inherit private fields with direct variable access',
         'Multiple inheritance with two classes using extends is permitted in standard Java',
         'Constructors in the superclass can be marked abstract and overridden directly',
       ],
       correctIndex: 0,
-      explanation: 'super() must be the first statement in a subclass constructor to initialize superclass state.',
+      explanation: 'super() must be the first statement in a subclass constructor to guarantee superclass state initialization.',
     },
     practiceQuestion: {
-      prompt: 'Remedial Practice: How do you prevent a subclass from overriding a method in Java?',
+      prompt: 'Remedial Practice: How do you prevent a subclass from overriding a specific method in Java?',
       options: [
-        'Declare the method as final (e.g. public final void computeSalary())',
+        'Declare the method as `final` (e.g. public final void computeSalary())',
         'Mark the method with @Override(immutable = true)',
         'Declare the method inside a static block only',
         'Make the method protected abstract without parameters',
       ],
       correctIndex: 0,
-      explanation: 'The `final` keyword prevents a method from being overridden by any subclass.',
+      explanation: 'The `final` keyword explicitly prevents any subclass from overriding that method.',
     },
   },
   {
     id: 'polymorphism',
     name: 'Polymorphism & Dynamic Dispatch',
-    category: 'Java OOP',
+    category: 'Java OOP Core',
     initialScore: 62,
     status: 'Needs Review',
+    keywords: ['@Override', 'vtable', 'dynamic dispatch', 'runtime binding'],
+    description: 'Enabling a single interface or parent type to represent distinct underlying runtime behaviors via method overriding and vtable dispatch.',
     quizQuestion: {
       prompt: 'What mechanism does the Java Virtual Machine (JVM) use at runtime to resolve overridden methods?',
       options: [
-        'Dynamic Method Dispatch (Virtual Method Table / vtable lookup)',
+        'Dynamic Method Dispatch (Virtual Method Table / vtable lookup based on runtime object type)',
         'Compile-time inline byte patching',
         'Static link-time address calculation',
         'Class loader lazy byte replacement',
       ],
       correctIndex: 0,
-      explanation: 'Dynamic method dispatch determines the method implementation to execute based on runtime object type.',
+      explanation: 'Dynamic method dispatch checks the actual object instance on the heap at runtime using its vtable.',
     },
     practiceQuestion: {
-      prompt: 'Remedial Practice: Which annotation is recommended in Java to catch method signature discrepancies at compile time?',
+      prompt: 'Remedial Practice: Which Java annotation is recommended to ensure method overriding signatures match the superclass at compile-time?',
       options: ['@Override', '@Polymorphic', '@Virtual', '@InheritedMethod'],
       correctIndex: 0,
-      explanation: '@Override ensures the compiler verifies the method actually overrides a superclass method.',
+      explanation: '@Override instructs the compiler to verify that an identically matched superclass method is indeed overridden.',
     },
+  },
+];
+
+export const CURATED_OOP_VIDEOS = [
+  {
+    id: 'vid-1',
+    title: 'Java Object-Oriented Programming (OOP) Full Course',
+    author: 'freeCodeCamp.org',
+    duration: '2h 15m',
+    level: 'Core Foundation',
+    url: 'https://www.youtube.com/watch?v=A74TOX803D0',
+    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500&q=80',
+    badge: 'Classes & Objects',
+    topics: ['Classes', 'Constructors', 'Memory Model'],
   },
   {
-    id: 'dynamic_programming',
-    name: 'Dynamic Programming (Memoization)',
-    category: 'Algorithms',
-    initialScore: 48,
-    status: 'Weak Topic',
-    quizQuestion: {
-      prompt: 'When converting a recursive exponential O(2^N) algorithm into an O(N) DP algorithm, what condition must the problem satisfy?',
-      options: [
-        'Optimal Substructure and Overlapping Subproblems',
-        'Disjoint independent subproblems without overlap',
-        'Strict topological acyclic sortability only',
-        'Greedy choice property with monotonic decay',
-      ],
-      correctIndex: 0,
-      explanation: 'Dynamic programming requires both optimal substructure and overlapping subproblems for memoization.',
-    },
-    practiceQuestion: {
-      prompt: 'Remedial Practice: What is the space complexity advantage of bottom-up state reduction in the Fibonacci DP sequence?',
-      options: [
-        'Reduces auxiliary space from O(N) array to O(1) two-variable swap',
-        'Reduces recursion stack frames from O(N) to O(log N)',
-        'Eliminates all cache memory misses',
-        'Guarantees O(1) time complexity',
-      ],
-      correctIndex: 0,
-      explanation: 'Keeping only the two most recent values reduces memory from O(N) array to O(1).',
-    },
+    id: 'vid-2',
+    title: 'Java Abstraction & Interfaces Explained',
+    author: 'Telusko (Navin Reddy)',
+    duration: '42m',
+    level: 'Intermediate',
+    url: 'https://www.youtube.com/watch?v=9JpDgphff98',
+    thumbnail: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500&q=80',
+    badge: 'Abstract Contracts',
+    topics: ['Abstract Methods', 'Interfaces', 'Default Methods'],
   },
+  {
+    id: 'vid-3',
+    title: 'Java Encapsulation & Data Hiding Masterclass',
+    author: 'Bro Code',
+    duration: '28m',
+    level: 'Essential',
+    url: 'https://www.youtube.com/watch?v=2nff1jL54zI',
+    thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&q=80',
+    badge: 'Encapsulation',
+    topics: ['Private Modifiers', 'Getters/Setters', 'State Invariants'],
+  },
+  {
+    id: 'vid-4',
+    title: 'Java Polymorphism & Dynamic Method Dispatch in JVM',
+    author: 'Java Brains (Koushik)',
+    duration: '36m',
+    level: 'Advanced',
+    url: 'https://www.youtube.com/watch?v=0w5c_tXwN6E',
+    thumbnail: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=500&q=80',
+    badge: 'Dynamic Dispatch',
+    topics: ['VTable', 'Late Binding', 'Runtime Overriding'],
+  },
+];
+
+export const TOPIC_CODING_CHALLENGES = [
+  {
+    id: 'challenge-1',
+    title: 'Design a Bank Account & Transaction System',
+    conceptId: 'classes_objects',
+    conceptName: 'Classes & Objects',
+    difficulty: 'Medium',
+    timeLimit: '30 mins',
+    description: 'Design a BankAccount class with account number, balance, deposit validation, withdraw limit checking, and real-time balance queries.',
+    templateKey: 'Java: Classes & Objects (Bank Account)',
+  },
+  {
+    id: 'challenge-2',
+    title: 'Secure ATM & Payment Gateway Interface',
+    conceptId: 'abstraction',
+    conceptName: 'Abstraction & Encapsulation',
+    difficulty: 'Hard',
+    timeLimit: '40 mins',
+    description: 'Implement an abstract PaymentGateway contract and SecureATM class with vault cash enforcement, encrypted transaction processing, and audit state.',
+    templateKey: 'Java: Abstraction & Encapsulation (Payment Gateway)',
+  },
+  {
+    id: 'challenge-3',
+    title: 'Employee Hierarchy & Super Constructor Chaining',
+    conceptId: 'inheritance',
+    conceptName: 'Inheritance & Subclassing',
+    difficulty: 'Medium',
+    timeLimit: '35 mins',
+    description: 'Create an inheritance hierarchy where Manager extends Employee which extends Person. Call super(name) in constructors and calculate composite pay.',
+    templateKey: 'Java: Inheritance & Super Keyword',
+  },
+  {
+    id: 'challenge-4',
+    title: 'Dynamic Shape Area & Perimeter Calculator',
+    conceptId: 'polymorphism',
+    conceptName: 'Polymorphism & Dynamic Dispatch',
+    difficulty: 'Medium',
+    timeLimit: '30 mins',
+    description: 'Implement abstract Shape base class with Circle and Rectangle. Demonstrate runtime polymorphism and dynamic method dispatch via vtable.',
+    templateKey: 'Java: Polymorphic Shape Calculator',
+  },
+];
+
+export const TOP_RANKERS = [
+  { rank: 1, name: 'Siddharth Sharma', college: 'COEP Pune', score: 99.4, streak: 34, solved: 82, badge: '🏆 Grandmaster' },
+  { rank: 2, name: 'Vaibhavi Gulhane', college: 'VIIT Pune', score: 97.8, streak: 28, solved: 76, badge: '⭐ Diamond' },
+  { rank: 3, name: 'Aditya Kulkarni', college: 'PICT Pune', score: 96.5, streak: 21, solved: 71, badge: '⭐ Diamond' },
+  { rank: 4, name: 'Tanmay Deshmukh', college: 'VIT Pune', score: 95.2, streak: 19, solved: 68, badge: '🥇 Gold' },
+  { rank: 5, name: 'Sneha Patil', college: 'DY Patil Akurdi', score: 94.0, streak: 16, solved: 64, badge: '🥇 Gold' },
+  { rank: 6, name: 'Rohit Joshi', college: 'PCCOE Pune', score: 92.6, streak: 14, solved: 59, badge: '🥈 Silver' },
+  { rank: 7, name: 'Pooja Jadhav', college: 'AISSMS Pune', score: 91.3, streak: 12, solved: 55, badge: '🥈 Silver' },
+  { rank: 8, name: 'Manthan Sakat', college: 'SPPU Campus', score: 90.1, streak: 11, solved: 52, badge: '🥉 Bronze' },
+  { rank: 9, name: 'Neha More', college: 'MIT-WPU Pune', score: 88.5, streak: 9, solved: 48, badge: '🥉 Bronze' },
+  { rank: 10, name: 'Kunal Shinde', college: 'Modern COE', score: 87.2, streak: 8, solved: 44, badge: '🥉 Bronze' },
 ];
 
 export default function StudentPortal() {
@@ -337,6 +569,83 @@ export default function StudentPortal() {
   const hiddenVideoRef = useRef(null);
   const questionContainerRef = useRef(null);
 
+  // Feature 2: Anti-Cheating Chronological Event Timeline State
+  const [sessionTimeline, setSessionTimeline] = useState([
+    { time: '00:01', type: 'SESSION_START', text: 'Exam environment initialized with Monaco Editor & Browser Visibility API' },
+    { time: '01:14', type: 'TYPING', text: 'Typing cadence registered: 74 WPM (Standard variance)' },
+  ]);
+
+  const addTimelineEvent = useCallback((type, text) => {
+    const now = new Date();
+    const timeStr = `${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    setSessionTimeline((prev) => [{ time: timeStr, type, text }, ...prev.slice(0, 19)]);
+  }, []);
+
+  // Client-Side Warning Pointer State (0 to 3) & Immediate Lockout
+  const [integrityWarnings, setIntegrityWarnings] = useState(0);
+  const [isTestLocked, setIsTestLocked] = useState(false);
+  const [lockoutReason, setLockoutReason] = useState('');
+  const lastWarningTimeRef = useRef(0);
+
+  // Trigger Violation Warning: increments pointer 1/3 -> 2/3 -> 3/3 and terminates test
+  const triggerViolationWarning = useCallback(
+    (reason, details = {}) => {
+      const now = Date.now();
+      if (now - lastWarningTimeRef.current < 1200) {
+        return;
+      }
+      lastWarningTimeRef.current = now;
+
+      setIntegrityWarnings((prev) => {
+        const nextCount = Math.min(prev + 1, 3);
+
+        setActiveToastSignal({
+          type: 'INTEGRITY_VIOLATION',
+          text: `Integrity Warning ${nextCount}/3: ${reason}`,
+        });
+
+        addTimelineEvent('VIOLATION_RECORDED', `Warning ${nextCount}/3: ${reason}`);
+
+        if (nextCount >= 3) {
+          setIsTestLocked(true);
+          setIsExamActive(false);
+          setAssessmentSubmitted(true);
+          setLockoutReason(reason);
+          addTimelineEvent(
+            'EXAM_TERMINATED',
+            `Assessment terminated due to reaching 3/3 warnings (${reason}). Auto-submitted.`
+          );
+        }
+
+        return nextCount;
+      });
+    },
+    [addTimelineEvent]
+  );
+
+  // Exit from Lockout back to Student Dashboard
+  const handleExitToDashboardFromLock = useCallback(() => {
+    setIsExamActive(false);
+    setIsTestLocked(false);
+    setIntegrityWarnings(0);
+    setIsPreTestOpen(false);
+    setIsConsentOpen(false);
+    if (activeCameraStream) {
+      try {
+        activeCameraStream.getTracks().forEach((t) => t.stop());
+      } catch (_) {}
+      setActiveCameraStream(null);
+    }
+    if (screenStream) {
+      try {
+        screenStream.getTracks().forEach((t) => t.stop());
+      } catch (_) {}
+      setScreenStream(null);
+      setIsScreenRecording(false);
+    }
+    setActiveTab('overview');
+  }, [activeCameraStream, screenStream]);
+
   // Proctoring Client Hook (Keystrokes & Warning System)
   const {
     warningCount,
@@ -361,19 +670,46 @@ export default function StudentPortal() {
     },
   });
 
+  // Custom Paste Blocker wrapping handleBlockedPaste with warning pointer increment
+  const handleBlockedPasteCustom = useCallback(
+    (e, charCountEstimate = 0) => {
+      handleBlockedPaste(e, charCountEstimate);
+      triggerViolationWarning(
+        `Clipboard paste detected (${charCountEstimate > 0 ? charCountEstimate + ' characters' : 'external content'}). External pasting is prohibited.`
+      );
+    },
+    [handleBlockedPaste, triggerViolationWarning]
+  );
+
   // Buffered Integrity Events Hook (Flushes every 5s & on submit to POST /api/events)
   const { logSignal, flushEvents } = useIntegrityEvents({
     sessionId,
     isActive: isExamActive && activeTab === 'assessment',
   });
 
-  // Unified evidence signal dispatcher: logs to buffer + displays gentle toast
+  // Unified evidence signal dispatcher: logs to buffer + displays gentle toast + triggers warning pointer
   const handleEvidenceSignal = useCallback(
     (signal) => {
       logSignal(signal.type, signal.text, signal.meta);
       setActiveToastSignal(signal);
+
+      const violationTypes = [
+        'TAB_SWITCH',
+        'VISIBILITY_HIDDEN',
+        'WINDOW_BLUR',
+        'FULLSCREEN_EXIT',
+        'PASTE_ATTEMPT',
+        'PASTE_BLOCKED',
+        'MULTIPLE_FACES',
+        'FACE_DISAPPEARED',
+        'FACE_ABSENT',
+      ];
+
+      if (violationTypes.includes(signal.type)) {
+        triggerViolationWarning(signal.text || signal.type, signal.meta);
+      }
     },
-    [logSignal]
+    [logSignal, triggerViolationWarning]
   );
 
   // Synchronize stream with hidden video element for continuous frame analysis
@@ -465,18 +801,6 @@ export default function StudentPortal() {
   const [adaptiveRecommendation, setAdaptiveRecommendation] = useState(
     'Knowledge Graph Initialized: Start with "Classes & Objects" to calibrate OOP baseline.'
   );
-
-  // Feature 2: Anti-Cheating Chronological Event Timeline State
-  const [sessionTimeline, setSessionTimeline] = useState([
-    { time: '00:01', type: 'SESSION_START', text: 'Exam environment initialized with Monaco Editor & Browser Visibility API' },
-    { time: '01:14', type: 'TYPING', text: 'Typing cadence registered: 74 WPM (Standard variance)' },
-  ]);
-
-  const addTimelineEvent = useCallback((type, text) => {
-    const now = new Date();
-    const timeStr = `${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    setSessionTimeline((prev) => [{ time: timeStr, type, text }, ...prev.slice(0, 19)]);
-  }, []);
 
   // Feature 4: AI Viva Interactive State (3 Questions on Submitted Code)
   const [vivaAnswer1, setVivaAnswer1] = useState('');
@@ -794,7 +1118,7 @@ export default function StudentPortal() {
         q2Feedback: `Approach & Data Structures: Strong technical rationale matching the architecture of the submitted code snippet.`,
         q3Feedback: `Error Diagnostics: Accurate identification of potential boundary exceptions and debugging flow.`,
         codeSimilarity: '92% High Alignment (Candidate explanation strongly aligns with submitted code)',
-        disclaimer: 'महत्त्वाचं: AI Viva चा score हा विद्यार्थ्याच्या समजुतीचा एक संकेत (understanding indicator) आहे; तो एकटाच अंतिम निर्णयासाठी पुरेसा नाही. अंतिम निर्णय शिक्षकाने (Teacher) घ्यावा.',
+        disclaimer: 'Important: The AI Viva score serves as an understanding indicator; it is not solely sufficient for a final assessment decision. The final evaluation is made by the Teacher.',
       };
 
       setVivaGrade(evaluation);
@@ -830,6 +1154,8 @@ export default function StudentPortal() {
     { id: 'assessment', label: 'Coding Assessment', icon: Code2, badge: '🔴 REC' },
     { id: 'results', label: 'Results & Feedback', icon: FileCheck2 },
     { id: 'viva', label: 'Code Viva Questions', icon: MessageSquareCode, badge: 'New' },
+    { id: 'leaderboard', label: 'Top Rankers', icon: Award, badge: '🏆' },
+    { id: 'about', label: 'About Us', icon: Info },
   ];
 
   return (
@@ -936,9 +1262,8 @@ export default function StudentPortal() {
                   Welcome back, {candidateName || user?.name || 'Learner'}
                 </h1>
                 <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">
-                  Your personalized adaptive track has detected strengths in Data Structures and
-                  flagged <span className="text-amber-400 font-semibold">Dynamic Programming</span> for
-                  targeted remediation.
+                  Your personalized adaptive track is currently focusing on <span className="text-white font-semibold">Java OOP Core Concepts</span>.
+                  Topic <span className="text-amber-400 font-semibold">Inheritance &amp; Subclassing</span> is flagged for targeted remediation.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -950,213 +1275,600 @@ export default function StudentPortal() {
                     <span>Start Active Assessment ({examTitle ? examTitle.split('(')[0].trim() : 'Assessment'})</span>
                   </button>
                   <button
-                    onClick={() => setActiveTab('path')}
+                    onClick={() => setActiveTab('leaderboard')}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold border border-zinc-700/60 transition"
                   >
-                    <GitFork className="w-3.5 h-3.5" />
-                    <span>View Adaptive Skill Tree</span>
+                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                    <span>View Top Rankers</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800">
-                <div className="text-xs text-zinc-400 mb-1 flex items-center justify-between">
-                  <span>Learning Path Progress</span>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            {/* ========================================================
+                TOP OF STUDENT DASHBOARD (Handwritten Specs - Image 1)
+                1. Ongoing Topic to Progress
+                2. Progress to Cover Up Widgets: [Backlog], [Week Topics], [Streak]
+                ======================================================== */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              {/* Ongoing Topic to Progress (5 cols) */}
+              <div className="lg:col-span-5 p-6 rounded-3xl bg-gradient-to-br from-indigo-950/40 via-zinc-900 to-zinc-950 border border-indigo-900/50 shadow-xl flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                  <Code2 className="w-32 h-32 text-indigo-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">68%</div>
-                <div className="mt-2 h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-white rounded-full" style={{ width: '68%' }} />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-900/60 border border-indigo-700/80 text-[11px] font-bold text-indigo-300 uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                      Ongoing Topic to Progress
+                    </span>
+                    <span className="text-xs font-bold font-mono text-indigo-300">65% Completed</span>
+                  </div>
+
+                  <h3 className="text-xl font-extrabold text-white mb-2">
+                    Java OOP: Inheritance &amp; Polymorphism
+                  </h3>
+                  <p className="text-xs text-zinc-300 leading-relaxed mb-4">
+                    Mastering constructor chaining using <code className="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded font-mono">super()</code>, dynamic method dispatch in the JVM virtual method table (vtable), and abstract class inheritance.
+                  </p>
+
+                  <div className="space-y-1.5 mb-5">
+                    <div className="flex justify-between text-[11px] text-zinc-400">
+                      <span>Curriculum Progression</span>
+                      <span className="font-semibold text-white">Module 3 of 5</span>
+                    </div>
+                    <div className="h-2.5 w-full bg-zinc-800 rounded-full overflow-hidden p-0.5 border border-zinc-700/60">
+                      <div className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full transition-all duration-700" style={{ width: '65%' }} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-indigo-950/80">
+                  <button
+                    onClick={() => {
+                      const inh = concepts.find((c) => c.id === 'inheritance') || concepts[3];
+                      setActiveConceptId(inh.id);
+                      const el = document.getElementById('skill-quiz-section');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200 transition shadow"
+                  >
+                    <span>Continue Topic Practice</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setExamTitle('Java: Inheritance & Super Keyword');
+                      setSelectedTemplateKey('Java: Inheritance & Super Keyword');
+                      setCodeContent(PROBLEM_TEMPLATES['Java: Inheritance & Super Keyword'] || '');
+                      setActiveTab('assessment');
+                    }}
+                    className="px-3.5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-semibold border border-zinc-700 transition"
+                  >
+                    Start Coding Test
+                  </button>
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800">
-                <div className="text-xs text-zinc-400 mb-1 flex items-center justify-between">
-                  <span>Concept Mastery Index</span>
-                  <Sparkles className="w-4 h-4 text-zinc-300" />
-                </div>
-                <div className="text-2xl font-bold text-white">88.4%</div>
-                <span className="text-[11px] text-emerald-400 font-medium">Advanced Competency</span>
-              </div>
+              {/* Progress to Cover Up Widgets: [Backlog], [Week Topics], [Streak] (7 cols) */}
+              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Widget 1: [Backlog] */}
+                <div className="p-5 rounded-3xl bg-zinc-900/60 border border-amber-900/50 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-amber-700/60 transition">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-1 rounded-full bg-amber-950/80 border border-amber-800 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                        [Backlog]
+                      </span>
+                      <AlertTriangle className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <h4 className="text-sm font-bold text-white mt-1">
+                      Inheritance super() Keyword
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 leading-snug">
+                      Knowledge gap detected in constructor delegation. 48% mastery registered.
+                    </p>
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-950/50 text-amber-300 text-[10px] font-medium border border-amber-900/60">
+                      <span>Needs Remediation Practice</span>
+                    </div>
+                  </div>
 
-              <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800">
-                <div className="text-xs text-zinc-400 mb-1 flex items-center justify-between">
-                  <span>Weak Concepts Flagged</span>
-                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <div className="pt-3 mt-3 border-t border-zinc-800">
+                    <button
+                      onClick={() => {
+                        const inh = concepts.find((c) => c.id === 'inheritance') || concepts[3];
+                        setActiveConceptId(inh.id);
+                        const el = document.getElementById('skill-quiz-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="w-full py-2 px-2.5 rounded-xl bg-amber-400 text-zinc-950 text-xs font-bold hover:bg-amber-300 transition text-center shadow-xs"
+                    >
+                      Remedial Practice
+                    </button>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-amber-400">2 Topics</div>
-                <span className="text-[11px] text-zinc-400">DP & Concurrency</span>
-              </div>
 
-              <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800">
-                <div className="text-xs text-zinc-400 mb-1 flex items-center justify-between">
-                  <span>Daily Coding Streak</span>
-                  <Flame className="w-4 h-4 text-orange-400" />
+                {/* Widget 2: [Week Topics] */}
+                <div className="p-5 rounded-3xl bg-zinc-900/60 border border-zinc-800 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-zinc-700 transition">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
+                        [Week Topics]
+                      </span>
+                      <BookOpen className="w-4 h-4 text-zinc-300" />
+                    </div>
+                    <h4 className="text-sm font-bold text-white mt-1">
+                      Week 4: 5 Core OOP Concepts
+                    </h4>
+                    <ul className="text-[11px] text-zinc-300 space-y-1 mt-1 font-mono">
+                      <li className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        <span>1. Classes &amp; Objects</span>
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                        <span>2. Abstraction</span>
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                        <span>3. Encapsulation</span>
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        <span>4. Inheritance</span>
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                        <span>5. Polymorphism</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-zinc-800">
+                    <button
+                      onClick={() => setActiveTab('courses')}
+                      className="w-full py-2 px-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold border border-zinc-700 transition text-center"
+                    >
+                      View Full Syllabus
+                    </button>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-white">14 Days</div>
-                <span className="text-[11px] text-zinc-400">All sessions replay recorded</span>
+
+                {/* Widget 3: [Streak] */}
+                <div className="p-5 rounded-3xl bg-zinc-900/60 border border-orange-900/40 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-orange-700/60 transition">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-1 rounded-full bg-orange-950/80 border border-orange-800 text-[10px] font-bold text-orange-300 uppercase tracking-wider">
+                        [Streak]
+                      </span>
+                      <Flame className="w-4 h-4 text-orange-400 fill-orange-400" />
+                    </div>
+                    <div className="flex items-baseline gap-1.5 mt-1">
+                      <span className="text-2xl font-black text-white">5</span>
+                      <span className="text-xs font-bold text-orange-400 uppercase">Day Streak 🔥</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-snug">
+                      5 days active this week! Solve today&apos;s OOP challenge to keep your streak burning.
+                    </p>
+
+                    {/* 7-Day Bubble Visual */}
+                    <div className="flex items-center justify-between gap-1 pt-1">
+                      {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, dIdx) => (
+                        <div key={dIdx} className="flex flex-col items-center gap-0.5">
+                          <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                            dIdx < 5
+                              ? 'bg-orange-500 text-black font-extrabold shadow-sm'
+                              : 'bg-zinc-800 text-zinc-500 border border-zinc-700'
+                          }`}>
+                            {dIdx < 5 ? '✓' : day}
+                          </span>
+                          <span className="text-[9px] text-zinc-500">{day}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-zinc-800">
+                    <button
+                      onClick={handleStartExamClick}
+                      className="w-full py-2 px-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-black text-xs font-bold transition text-center shadow-xs"
+                    >
+                      Solve Daily Test
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Concept Mastery & Weak Topics Alert */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Concept Mastery Radar List */}
-              <div className="lg:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 sm:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300">
-                    Concept Mastery Breakdown
+            {/* ========================================================
+                STUDENT SKILL GRAPH & DYNAMIC REAL-TIME MCQ QUIZ
+                Interactive Skill Graph that immediately updates scores!
+                ======================================================== */}
+            <div id="skill-quiz-section" className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-6 sm:p-8 space-y-6 shadow-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-800 gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-700/80 text-[10px] font-bold text-indigo-300 uppercase tracking-wider">
+                      Dynamic Adaptive Engine
+                    </span>
+                    <span className="text-xs text-zinc-400">Live Skill Graph &amp; Knowledge Tracer</span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                    Adaptive Skill Mastery Graph &amp; Interactive Quiz
                   </h3>
-                  <span className="text-xs text-zinc-500">Updated from last assessment</span>
+                  <p className="text-xs text-zinc-400 mt-1">
+                    Answer the interactive concept check below. When your answer is verified, your mastery score updates in real time on the skill graph!
+                  </p>
                 </div>
+                <div className="flex items-center gap-3 text-xs shrink-0">
+                  <span className="flex items-center gap-1.5 text-emerald-400">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" /> Mastered (&ge;80%)
+                  </span>
+                  <span className="flex items-center gap-1.5 text-indigo-300">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-400" /> In Progress (60-79%)
+                  </span>
+                  <span className="flex items-center gap-1.5 text-amber-400">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" /> Weak Topic (&lt;60%)
+                  </span>
+                </div>
+              </div>
 
-                <div className="space-y-3.5">
-                  {concepts.map((item, idx) => (
-                    <div key={idx}>
-                      <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-semibold text-zinc-200">{item.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`text-[11px] px-2 py-0.5 rounded font-semibold ${
-                              item.initialScore >= 80
-                                ? 'bg-zinc-800 text-zinc-300 border border-zinc-700'
-                                : item.initialScore >= 60
-                                ? 'bg-zinc-800/80 text-zinc-400 border border-zinc-700'
-                                : 'bg-amber-950/70 text-amber-400 border border-amber-800/80 animate-pulse'
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left: Dynamic Skill Mastery Bars & Radar Representation (6 cols) */}
+                <div className="lg:col-span-6 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 p-5 space-y-4 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-indigo-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                          5 Core Java OOP Concepts Mastery Graph
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-zinc-500 font-mono">Real-time Calibrated</span>
+                    </div>
+
+                    <div className="space-y-4">
+                      {concepts.map((c) => {
+                        const isSelected = c.id === activeConceptId;
+                        return (
+                          <div
+                            key={c.id}
+                            onClick={() => {
+                              setActiveConceptId(c.id);
+                              setQuizSelectedOption(null);
+                              setQuizFeedback(null);
+                            }}
+                            className={`p-3 rounded-xl border transition cursor-pointer ${
+                              isSelected
+                                ? 'bg-zinc-800/80 border-indigo-500/80 shadow-md ring-1 ring-indigo-500/40'
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700'
                             }`}
                           >
-                            {item.status} ({item.initialScore}%)
+                            <div className="flex items-center justify-between text-xs mb-1.5">
+                              <span className="font-bold text-white flex items-center gap-1.5">
+                                {isSelected && <span className="w-2 h-2 rounded-full bg-indigo-400" />}
+                                {c.name}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-[11px] px-2 py-0.5 rounded font-mono font-bold ${
+                                  c.initialScore >= 80
+                                    ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
+                                    : c.initialScore >= 60
+                                    ? 'bg-indigo-950/80 text-indigo-300 border border-indigo-800'
+                                    : 'bg-amber-950/80 text-amber-300 border border-amber-800 animate-pulse'
+                                }`}>
+                                  {c.initialScore}% • {c.status}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="h-2.5 w-full bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800">
+                              <div
+                                className={`h-full rounded-full transition-all duration-700 ${
+                                  c.initialScore >= 80
+                                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                                    : c.initialScore >= 60
+                                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-400'
+                                    : 'bg-gradient-to-r from-amber-500 to-amber-400'
+                                }`}
+                                style={{ width: `${c.initialScore}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800 text-[11px] text-zinc-400 flex items-center justify-between">
+                    <span>💡 Click any concept card to load its interactive quiz on the right.</span>
+                    <span className="font-bold text-white">Avg Score: {Math.round(concepts.reduce((acc, c) => acc + c.initialScore, 0) / concepts.length)}%</span>
+                  </div>
+                </div>
+
+                {/* Right: Dynamic Interactive Concept MCQ Quiz (6 cols) */}
+                <div className="lg:col-span-6 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 p-5 space-y-4">
+                  {(() => {
+                    const currentConcept = concepts.find((c) => c.id === activeConceptId) || concepts[0];
+                    return (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-indigo-400" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-white">
+                              Live Concept Quiz: {currentConcept.name}
+                            </span>
+                          </div>
+                          <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${
+                            currentConcept.initialScore >= 80 ? 'text-emerald-400' : 'text-amber-400'
+                          }`}>
+                            Current: {currentConcept.initialScore}%
+                          </span>
+                        </div>
+
+                        <p className="text-xs font-semibold text-zinc-100 leading-relaxed bg-zinc-950/70 p-3 rounded-xl border border-zinc-800">
+                          {currentConcept.quizQuestion.prompt}
+                        </p>
+
+                        <div className="space-y-2">
+                          {currentConcept.quizQuestion.options.map((opt, oIdx) => (
+                            <label
+                              key={oIdx}
+                              onClick={() => setQuizSelectedOption(oIdx)}
+                              className={`flex items-start gap-3 p-3 rounded-xl border text-xs cursor-pointer transition ${
+                                quizSelectedOption === oIdx
+                                  ? 'bg-indigo-950/50 border-indigo-500 text-white shadow-sm'
+                                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="dynamic_quiz"
+                                checked={quizSelectedOption === oIdx}
+                                onChange={() => setQuizSelectedOption(oIdx)}
+                                className="mt-0.5 text-indigo-500 focus:ring-0"
+                              />
+                              <span className="leading-relaxed">{opt}</span>
+                            </label>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-[11px] text-zinc-500">
+                            Updates skill mastery by +15 or -10 points.
+                          </span>
+                          <button
+                            onClick={handleAnswerQuiz}
+                            className="px-5 py-2 rounded-xl bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200 transition shadow"
+                          >
+                            Submit Answer &amp; Update Graph
+                          </button>
+                        </div>
+
+                        {quizFeedback && (
+                          <div className={`p-3.5 rounded-xl border text-xs space-y-1 ${
+                            quizFeedback.correct
+                              ? 'bg-emerald-950/40 border-emerald-800/80 text-emerald-200'
+                              : 'bg-amber-950/40 border-amber-800/80 text-amber-200'
+                          }`}>
+                            <div className="font-bold flex items-center gap-1.5">
+                              {quizFeedback.correct ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertTriangle className="w-4 h-4 text-amber-400" />}
+                              <span>{quizFeedback.title}</span>
+                            </div>
+                            <p className="text-[11px] leading-relaxed text-zinc-300">
+                              {quizFeedback.message}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* ========================================================
+                5 CORE JAVA OOP VISUAL CONCEPT ROADMAP / MAPS
+                ======================================================== */}
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/30 p-6 sm:p-8 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800 gap-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Layers className="w-4 h-4 text-indigo-400" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                      Curriculum Architecture
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">5 Core Java OOP Visual Concept Maps</h3>
+                </div>
+                <span className="text-xs text-zinc-400">Sequential Learning Roadmap</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5 relative">
+                {concepts.slice(0, 5).map((concept, cIdx) => (
+                  <div
+                    key={concept.id}
+                    className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex flex-col justify-between hover:border-indigo-500/60 transition group shadow-md"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="w-6 h-6 rounded-lg bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-bold flex items-center justify-center font-mono">
+                          {cIdx + 1}
+                        </span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
+                          concept.initialScore >= 80
+                            ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
+                            : concept.initialScore >= 60
+                            ? 'bg-indigo-950/80 text-indigo-300 border border-indigo-800'
+                            : 'bg-amber-950/80 text-amber-300 border border-amber-800'
+                        }`}>
+                          {concept.status}
+                        </span>
+                      </div>
+
+                      <h4 className="font-bold text-sm text-white group-hover:text-indigo-300 transition mb-1.5">
+                        {concept.name}
+                      </h4>
+                      <p className="text-[11px] text-zinc-400 leading-snug mb-3">
+                        {concept.description}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex flex-wrap gap-1 pt-2 border-t border-zinc-800/80">
+                        {(concept.keywords || ['class', 'oop']).map((kw, kIdx) => (
+                          <span key={kIdx} className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-zinc-800">
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ========================================================
+                4 CURATED EDUCATIONAL VIDEO LINKS
+                ======================================================== */}
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/30 p-6 sm:p-8 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800 gap-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Video className="w-4 h-4 text-red-400" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                      Curated Video Masterclasses
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">4 Curated Java OOP Video Tutorials</h3>
+                </div>
+                <span className="text-xs text-zinc-400">Free High-Yield Video Lectures</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {CURATED_OOP_VIDEOS.map((vid) => (
+                  <div
+                    key={vid.id}
+                    className="rounded-2xl border border-zinc-800 bg-zinc-950/80 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition group shadow-lg"
+                  >
+                    <div>
+                      <div className="relative aspect-video w-full overflow-hidden bg-zinc-900">
+                        <img
+                          src={vid.thumbnail}
+                          alt={vid.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/80 text-white text-[10px] font-bold backdrop-blur-xs border border-white/20">
+                          {vid.badge}
+                        </span>
+                        <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/80 text-zinc-300 text-[10px] font-mono">
+                          {vid.duration}
+                        </span>
+                      </div>
+
+                      <div className="p-4 space-y-2">
+                        <div className="text-[11px] font-semibold text-indigo-400">{vid.author}</div>
+                        <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug">
+                          {vid.title}
+                        </h4>
+
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {vid.topics.map((t, tIdx) => (
+                            <span key={tIdx} className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 pt-0">
+                      <a
+                        href={vid.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-semibold border border-zinc-800 transition"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current text-red-400" />
+                        <span>Watch Video Lecture</span>
+                        <ExternalLink className="w-3 h-3 text-zinc-500 ml-0.5" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ========================================================
+                4 TOPIC-BASED CODING CHALLENGES
+                ======================================================== */}
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/30 p-6 sm:p-8 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800 gap-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Code2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                      Practice Assessments
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">4 Topic-Based Coding Tests</h3>
+                </div>
+                <span className="text-xs text-zinc-400">Tested Against Sandboxed Hidden Test Cases</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {TOPIC_CODING_CHALLENGES.map((challenge, chIdx) => (
+                  <div
+                    key={challenge.id}
+                    className="p-5 rounded-2xl bg-zinc-950/80 border border-zinc-800 flex flex-col justify-between hover:border-zinc-700 transition shadow-lg group"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-indigo-300 font-bold uppercase">
+                          Topic {chIdx + 1}: {challenge.conceptName}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
+                            challenge.difficulty === 'Hard'
+                              ? 'bg-red-950/80 text-red-300 border border-red-800'
+                              : 'bg-amber-950/80 text-amber-300 border border-amber-800'
+                          }`}>
+                            {challenge.difficulty}
+                          </span>
+                          <span className="text-[11px] text-zinc-500 font-mono flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {challenge.timeLimit}
                           </span>
                         </div>
                       </div>
-                      <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            item.initialScore >= 80
-                              ? 'bg-white'
-                              : item.initialScore >= 60
-                              ? 'bg-zinc-400'
-                              : 'bg-amber-400'
-                          }`}
-                          style={{ width: `${item.initialScore}%` }}
-                        />
-                      </div>
+
+                      <h4 className="text-sm font-bold text-white group-hover:text-indigo-300 transition">
+                        {challenge.title}
+                      </h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed">
+                        {challenge.description}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Action Box: Weak Topic Remediation */}
-              <div className="rounded-2xl border border-amber-900/40 bg-amber-950/20 p-5 sm:p-6 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>AI Adaptive Knowledge Engine</span>
-                  </div>
-                  <h4 className="text-base font-bold text-white mb-2">
-                    {concepts.find((c) => c.status === 'Weak Topic')?.name || 'Inheritance & Subclassing'} Remediation
-                  </h4>
-                  <p className="text-xs text-zinc-300/80 leading-relaxed">
-                    {adaptiveRecommendation}
-                  </p>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-amber-900/30">
-                  <button
-                    onClick={() => {
-                      const weak = concepts.find((c) => c.status === 'Weak Topic');
-                      if (weak) setActiveConceptId(weak.id);
-                      setActiveTab('path');
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-400 text-zinc-950 text-xs font-bold hover:bg-amber-300 transition"
-                  >
-                    <span>Open Adaptive Quiz &amp; Remediation</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Coding Assessments & Recent Feedback */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Upcoming / Active Assessments */}
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 sm:p-6">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-4">
-                  Assigned Coding Assessments
-                </h3>
-                <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-white">LRU Cache Implementation</span>
-                        <span className="text-[10px] bg-emerald-950/80 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800">
-                          Active Now
-                        </span>
-                      </div>
-                      <div className="text-xs text-zinc-400 mt-1">
-                        Hard • 45 mins • Keystroke replay enabled
-                      </div>
+                    <div className="pt-4 mt-4 border-t border-zinc-800/80 flex items-center justify-between">
+                      <span className="text-[11px] text-zinc-500 font-mono">Monaco Split Editor Enabled</span>
+                      <button
+                        onClick={() => {
+                          setExamTitle(challenge.title);
+                          setSelectedTemplateKey(challenge.templateKey);
+                          if (PROBLEM_TEMPLATES[challenge.templateKey]) {
+                            setCodeContent(PROBLEM_TEMPLATES[challenge.templateKey]);
+                          }
+                          setActiveTab('assessment');
+                        }}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200 transition shadow-sm"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Start Coding Test</span>
+                      </button>
                     </div>
-                    <button
-                      onClick={handleStartExamClick}
-                      className="px-3.5 py-1.5 rounded-lg bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200 transition"
-                    >
-                      Start Test
-                    </button>
                   </div>
-
-                  <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 flex items-center justify-between opacity-80">
-                    <div>
-                      <div className="font-bold text-sm text-zinc-300">
-                        Concurrent Thread-Safe Bounded Queue
-                      </div>
-                      <div className="text-xs text-zinc-500 mt-1">
-                        Advanced • Unlocks tomorrow at 10:00 AM
-                      </div>
-                    </div>
-                    <span className="text-xs text-zinc-500 px-3 py-1 rounded bg-zinc-800">
-                      Locked
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trainer Feedback & Viva Preview */}
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 sm:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300">
-                    Recent Trainer Feedback
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab('results')}
-                    className="text-xs text-zinc-400 hover:text-white underline underline-offset-4"
-                  >
-                    View All
-                  </button>
-                </div>
-
-                <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="font-bold text-white">Dr. Elena Vance (Trainer)</span>
-                    <span className="text-zinc-500">Yesterday on Trie Prefix Tree</span>
-                  </div>
-                  <p className="text-xs text-zinc-300 leading-relaxed italic">
-                    "Great typing cadence and zero pasted blocks. The memory footprint in your Trie node
-                    allocation was optimal. Please review the oral viva question regarding memory pooling."
-                  </p>
-                  <div className="mt-3 pt-3 border-t border-zinc-800 flex items-center justify-between">
-                    <span className="text-[11px] text-emerald-400 font-semibold">Score: 95/100</span>
-                    <button
-                      onClick={() => setActiveTab('viva')}
-                      className="text-xs text-zinc-300 hover:text-white font-semibold flex items-center gap-1"
-                    >
-                      <span>Answer Viva Question</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -1273,7 +1985,7 @@ export default function StudentPortal() {
                 </div>
                 <h2 className="text-2xl font-bold text-white">Dynamic Adaptive Skill Path &amp; Knowledge Tracer</h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  कसं काम करेल: समजा विद्यार्थी Java शिकत आहे (Classes &amp; Objects). त्याच्या answers वरून system performance मोजेल. Inheritance मध्ये weak असल्यास system अधिक practice देईल; mastery सुधारल्यावर पुढील topic recommend केला जाईल.
+                  Adaptive Mechanics: As a student learns Java (e.g. Classes &amp; Objects), the system tracks quiz mastery. If weak in Inheritance, targeted remedial practice is dynamically assigned; upon mastery, the next advanced topic is unlocked.
                 </p>
               </div>
               <div className="flex items-center gap-3 text-xs shrink-0">
@@ -1572,7 +2284,7 @@ export default function StudentPortal() {
 
             {/* Live Proctoring Warning Banner */}
             <WarningBanner
-              warningCount={warningCount}
+              warningCount={integrityWarnings || warningCount}
               maxWarnings={maxWarnings}
               message={warningMessage}
             />
@@ -1588,11 +2300,11 @@ export default function StudentPortal() {
                   <div className="text-xs font-bold text-white flex items-center gap-2">
                     <span>LIVE SESSION REPLAY ACTIVE</span>
                     <span className="text-[10px] text-zinc-400 font-mono">
-                      (Keystrokes & Hesitations Time-Indexed)
+                      (Keystrokes &amp; Hesitations Time-Indexed)
                     </span>
                   </div>
                   <div className="text-[11px] text-zinc-400">
-                    Candidate: {candidateName || user?.name || 'Candidate'} • ID: {candidateStudentId || user?.studentId || 'STU-ID'} • Warnings: {warningCount}/{maxWarnings} • Local AI Proctoring Active
+                    Candidate: {candidateName || user?.name || 'Candidate'} • ID: {candidateStudentId || user?.studentId || 'STU-ID'} • Local AI Proctoring Active
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-950/80 border border-rose-800 text-[10px] font-mono font-bold text-rose-300">
@@ -1606,8 +2318,32 @@ export default function StudentPortal() {
                 </div>
               </div>
 
-              {/* Local Webcam PIP preview & Controls */}
+              {/* Local Webcam PIP preview, Warning Pointer Indicator & Controls */}
               <div className="flex flex-wrap items-center gap-2.5">
+                {/* Live Visible Warning Pointer (1/3 -> 2/3 -> 3/3 Termination) */}
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
+                  integrityWarnings >= 2
+                    ? 'bg-red-950/90 text-red-300 border-red-700 animate-pulse'
+                    : integrityWarnings === 1
+                    ? 'bg-amber-950/80 text-amber-300 border-amber-700'
+                    : 'bg-emerald-950/50 text-emerald-400 border-emerald-800/80'
+                }`}>
+                  <AlertTriangle className={`w-3.5 h-3.5 ${integrityWarnings >= 2 ? 'text-red-400 animate-spin' : integrityWarnings === 1 ? 'text-amber-400' : 'text-emerald-400'}`} />
+                  <span>Warning: <strong className="font-mono text-white">{integrityWarnings} / 3</strong></span>
+                  {integrityWarnings === 1 && <span className="text-[10px] text-amber-300 font-normal hidden md:inline">(Caution: 1 logged)</span>}
+                  {integrityWarnings === 2 && <span className="text-[10px] text-red-300 font-semibold hidden md:inline">(FINAL WARNING!)</span>}
+                  {integrityWarnings >= 3 && <span className="text-[10px] text-red-200 font-bold hidden md:inline">(TERMINATED)</span>}
+                </div>
+
+                {/* Quick Simulation Test Button for Proctoring Warning */}
+                <button
+                  onClick={() => triggerViolationWarning('Manual violation test (e.g. Tab switch or block paste)')}
+                  className="text-[10px] text-zinc-400 hover:text-white px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition"
+                  title="Test warning pointer increment (1/3 -> 2/3 -> 3/3)"
+                >
+                  ⚠️ Test Warning (+1)
+                </button>
+
                 {(cameraActive || activeCameraStream) && (
                   <CameraPreview
                     stream={activeCameraStream || videoRef.current?.srcObject}
@@ -1646,6 +2382,10 @@ export default function StudentPortal() {
                   className="bg-zinc-800 text-xs font-semibold text-zinc-200 px-3 py-1.5 rounded-xl border border-zinc-700 focus:outline-none"
                   title="Select Challenge Template"
                 >
+                  <option value="Java: Classes & Objects (Bank Account)">Java: Classes &amp; Objects (Bank Account)</option>
+                  <option value="Java: Abstraction & Encapsulation (Payment Gateway)">Java: Abstraction &amp; Encapsulation</option>
+                  <option value="Java: Inheritance & Super Keyword">Java: Inheritance &amp; Super Keyword</option>
+                  <option value="Java: Polymorphic Shape Calculator">Java: Polymorphic Shape Calculator</option>
                   <option value="LRU Cache Implementation (O(1) Operations)">Template: LRU Cache (Hard)</option>
                   <option value="Two Sum with Hash Map Lookup">Template: Two Sum (Easy)</option>
                   <option value="Reverse a Linked List In-Place">Template: Reverse Linked List (Medium)</option>
@@ -1674,6 +2414,7 @@ export default function StudentPortal() {
                   onChange={(e) => setSelectedLanguage(e.target.value)}
                   className="bg-zinc-800 text-xs font-semibold text-zinc-200 px-3 py-1.5 rounded-xl border border-zinc-700 focus:outline-none"
                 >
+                  <option value="java">Java (JDK 21)</option>
                   <option value="javascript">JavaScript (Node.js)</option>
                   <option value="python">Python 3.11</option>
                 </select>
@@ -1697,52 +2438,75 @@ export default function StudentPortal() {
               </div>
             </div>
 
-            {/* Split Pane: Problem Prompt (Left) + Code Editor with Monaco (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              {/* Problem Prompt */}
+            {/* ========================================================
+                SPLIT CODING LAYOUT (Handwritten Specs - Image 2)
+                Left 50%: Problem Statement, Test Cases, Live PIP, Warning Count
+                Right 50%: Monaco Code Editor, Run & Submit Assessment
+                ======================================================== */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* LEFT COLUMN: 50% - Problem Statement, Constraints & Test Cases */}
               <div
                 ref={questionContainerRef}
-                className="lg:col-span-5 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-5 font-sans space-y-4 max-h-[580px] overflow-y-auto select-none"
+                className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5 font-sans space-y-4 max-h-[640px] overflow-y-auto select-none flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                    {currentQuestion ? `Concept: ${currentQuestion.conceptId}` : 'Assessment Task #14'}
-                  </span>
-                  <span className="text-xs text-zinc-500 font-mono">
-                    Session: {sessionId ? sessionId.slice(0, 12) : 'Active'}
-                  </span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                      {currentQuestion ? `Concept: ${currentQuestion.conceptId}` : 'Problem Statement (Left 50%)'}
+                    </span>
+                    <span className="text-xs text-zinc-500 font-mono">
+                      Session: {sessionId ? sessionId.slice(0, 12) : 'Active'}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-white">
+                    {examTitle || (currentQuestion ? currentQuestion.prompt.slice(0, 50) + '...' : 'Coding Assessment')}
+                  </h3>
+
+                  <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                    {customProblemPrompt || (currentQuestion ? currentQuestion.prompt : 'Implement your solution according to the challenge requirements. Write clean, modular code and run test cases to verify performance in the sandbox.')}
+                  </div>
+
+                  {currentQuestion?.reason && (
+                    <div className="p-3 rounded-xl bg-indigo-950/40 border border-indigo-800/60 text-xs text-indigo-300">
+                      <span className="font-bold text-indigo-200 mr-1">Adaptive Selector Reason:</span>
+                      {currentQuestion.reason}
+                    </div>
+                  )}
+
+                  {/* Test Cases Preview Box */}
+                  <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs space-y-2 font-mono">
+                    <div className="font-sans font-bold text-zinc-400 uppercase text-[10px]">
+                      Test Cases &amp; Execution Constraints
+                    </div>
+                    <div className="text-[11px] text-zinc-300">
+                      <div>Input: <span className="text-emerald-400">Standard Class Instantiation &amp; Method Invocations</span></div>
+                      <div>Expected: <span className="text-indigo-300">Correct return values across public &amp; hidden suites</span></div>
+                      <div>Timeout Cap: <span className="text-amber-400">5.0 seconds per case</span></div>
+                      <div>RAM Limit: <span className="text-amber-400">512 MB sandbox limit</span></div>
+                    </div>
+                  </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-white">
-                  {examTitle || (currentQuestion ? currentQuestion.prompt.slice(0, 50) + '...' : 'Coding Assessment')}
-                </h3>
-
-                <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                  {customProblemPrompt || (currentQuestion ? currentQuestion.prompt : 'Implement your solution according to the challenge requirements. Write clean, modular code and run test cases to verify performance.')}
-                </p>
-
-                {currentQuestion?.reason && (
-                  <div className="p-3 rounded-xl bg-indigo-950/40 border border-indigo-800/60 text-xs text-indigo-300">
-                    <span className="font-bold text-indigo-200 mr-1">Adaptive Selector Reason:</span>
-                    {currentQuestion.reason}
-                  </div>
-                )}
-
-                <div className="text-xs text-zinc-500">
-                  <strong>Integrity Rule:</strong> External paste is intercepted. Backspace, typing, and standard indentation are supported.
+                <div className="pt-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between">
+                  <span><strong>Integrity Rule:</strong> Copy/paste intercepted. Keystroke telemetry active.</span>
+                  <span className="text-amber-400 font-bold">Warnings: {integrityWarnings}/3</span>
                 </div>
               </div>
 
-              {/* In-Browser Interactive Monaco Code Editor with Paste Interception */}
-              <div className="lg:col-span-7 flex flex-col rounded-2xl border border-zinc-800 bg-[#0d0d10] overflow-hidden">
+              {/* RIGHT COLUMN: 50% - Monaco Code Editor + Output Console */}
+              <div className="flex flex-col rounded-2xl border border-zinc-800 bg-[#0d0d10] overflow-hidden max-h-[640px]">
                 <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800 bg-zinc-950 text-xs text-zinc-400">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                     <span className="font-mono text-zinc-300">
-                      {selectedLanguage === 'python' ? 'solution.py' : 'solution.js'}
+                      {selectedLanguage === 'python' ? 'Solution.py' : selectedLanguage === 'java' ? 'Solution.java' : 'Solution.js'}
                     </span>
                   </div>
-                  <span className="text-[11px] text-zinc-500">Keystroke Telemetry Logger Active</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-zinc-500">Right 50% Monaco Editor</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
                 </div>
 
                 <div className="relative flex-1 min-h-[380px] bg-[#0d0d10]">
@@ -1750,14 +2514,14 @@ export default function StudentPortal() {
                     value={codeContent}
                     onChange={(val) => setCodeContent(val)}
                     language={selectedLanguage}
-                    onPasteBlocked={handleBlockedPaste}
+                    onPasteBlocked={handleBlockedPasteCustom}
                     onKeyDownLog={(evt) => logEvent(evt.type, evt)}
                   />
                 </div>
 
                 {/* Test Output Console */}
                 {testOutput && (
-                  <div className="border-t border-zinc-800 bg-zinc-950 p-4 font-mono text-xs">
+                  <div className="border-t border-zinc-800 bg-zinc-950 p-4 font-mono text-xs max-h-[190px] overflow-y-auto">
                     <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800 text-zinc-400">
                       <span className="font-bold text-white flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -1804,10 +2568,10 @@ export default function StudentPortal() {
                     <span>AI / Rule-Based Activity Signals: Active</span>
                   </div>
                   <p className="text-[11px] text-zinc-300 leading-snug">
-                    उदा. एखाद्या विद्यार्थ्याने 50 lines चा code अचानक paste केला किंवा tab switch केला, तर system त्या घटनेचा timestamp नोंदवेल आणि Teacher कडे signal पाठवेल.
+                    For example, if a candidate suddenly pastes 50 lines of code or switches tabs, the system registers a timestamped event signal for teacher review.
                   </p>
                   <p className="text-[11px] text-amber-200/90 italic pt-1 border-t border-amber-900/40">
-                    <strong>महत्त्वाचं (Signal Policy):</strong> Tab switch किंवा मोठा paste म्हणजे cheating झाल्याचा पुरावा नाही. Browser मधून बाहेरील प्रत्येक AI tool चा वापर १००% विश्वसनीयपणे detect करता येत नाही. म्हणून system ने signals दाखवावेत; अंतिम निर्णय Teacher ने घ्यावा.
+                    <strong>Important (Signal Policy):</strong> A tab switch or block paste is an integrity signal, not conclusive proof of cheating. Browsers cannot detect every external AI tool with 100% certainty. The system provides objective telemetry signals; the final judgment rests with the Teacher.
                   </p>
                 </div>
 
@@ -1952,7 +2716,7 @@ export default function StudentPortal() {
                 </div>
                 <h2 className="text-2xl font-bold text-white">Code Explanation &amp; Viva Voce Assessment</h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  विद्यार्थ्याने program submit केला की AI त्याच code वर आधारित ३ मुख्य प्रश्न तयार करते. विद्यार्थ्याच्या उत्तरांचे code शी किती साम्य आहे याचे analysis केले जाते.
+                  When a student submits code, the AI generates 3 core analytical questions based directly on their implementation to measure genuine semantic comprehension.
                 </p>
               </div>
               <span className="text-xs font-semibold px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-300 self-start sm:self-auto">
@@ -1982,13 +2746,13 @@ export default function StudentPortal() {
             <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/40 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 uppercase tracking-wider">
                 <HelpCircle className="w-4 h-4 text-indigo-400" />
-                <span>प्रश्न १: या code चं output काय असेल? (Output Prediction &amp; Complexity)</span>
+                <span>Question 1: What will be the output and asymptotic complexity of this code?</span>
               </div>
               <h3 className="text-sm font-bold text-white">
                 What will be the output and asymptotic runtime of your submitted solution for {examTitle}?
               </h3>
               <p className="text-xs text-zinc-400">
-                तुमच्या code चे expected output आणि time/space complexity O(1) vs O(N) विशद करा:
+                Explain the expected output and time/space complexity (e.g. O(1) vs O(N)) of your implementation:
               </p>
               <textarea
                 value={vivaAnswer1}
@@ -2009,13 +2773,13 @@ export default function StudentPortal() {
             <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/40 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 uppercase tracking-wider">
                 <HelpCircle className="w-4 h-4 text-indigo-400" />
-                <span>प्रश्न २: तू हा approach का निवडला? (Algorithmic Rationale &amp; Data Structures)</span>
+                <span>Question 2: Why did you choose this architectural and data structure approach?</span>
               </div>
               <h3 className="text-sm font-bold text-white">
                 Why did you choose this algorithmic approach and data structure implementation?
               </h3>
               <p className="text-xs text-zinc-400">
-                हाच approach आणि data structures का निवडले? इतर पर्यायांपेक्षा (उदा. array vs linked list) हा कसा श्रेष्ठ आहे?
+                Explain why you selected these data structures (e.g., HashMap + DoublyLinkedList) and how it outperforms alternative approaches:
               </p>
               <textarea
                 value={vivaAnswer2}
@@ -2036,13 +2800,13 @@ export default function StudentPortal() {
             <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/40 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 uppercase tracking-wider">
                 <HelpCircle className="w-4 h-4 text-indigo-400" />
-                <span>प्रश्न ३: या code मध्ये error आल्यास तू तो कसा fix करशील? (Debugging &amp; Edge Cases)</span>
+                <span>Question 3: If an error or edge case occurs in this code, how will you diagnose and fix it?</span>
               </div>
               <h3 className="text-sm font-bold text-white">
                 If an error, exception, or edge case occurs in this code, how will you diagnose and fix it?
               </h3>
               <p className="text-xs text-zinc-400">
-                Boundary conditions, null pointers, capacity overflow किंवा thread race condition आल्यास तुम्ही code कसा debug कराल?
+                Explain how you handle edge cases (e.g., null pointers, zero capacity, out-of-bounds keys, or concurrent race conditions):
               </p>
               <textarea
                 value={vivaAnswer3}
@@ -2091,17 +2855,17 @@ export default function StudentPortal() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
-                    <div className="text-[11px] text-zinc-400">प्रश्न १ (Output &amp; Complexity)</div>
+                    <div className="text-[11px] text-zinc-400">Question 1 (Output &amp; Complexity)</div>
                     <div className="text-lg font-bold text-white mt-1">{vivaGrade.q1Score} / 10</div>
                     <p className="text-[10px] text-zinc-400 mt-1">{vivaGrade.q1Feedback}</p>
                   </div>
                   <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
-                    <div className="text-[11px] text-zinc-400">प्रश्न २ (Approach &amp; DS)</div>
+                    <div className="text-[11px] text-zinc-400">Question 2 (Approach &amp; DS)</div>
                     <div className="text-lg font-bold text-white mt-1">{vivaGrade.q2Score} / 10</div>
                     <p className="text-[10px] text-zinc-400 mt-1">{vivaGrade.q2Feedback}</p>
                   </div>
                   <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
-                    <div className="text-[11px] text-zinc-400">प्रश्न ३ (Error Diagnostics)</div>
+                    <div className="text-[11px] text-zinc-400">Question 3 (Error Diagnostics)</div>
                     <div className="text-lg font-bold text-white mt-1">{vivaGrade.q3Score} / 10</div>
                     <p className="text-[10px] text-zinc-400 mt-1">{vivaGrade.q3Feedback}</p>
                   </div>
@@ -2116,14 +2880,291 @@ export default function StudentPortal() {
                 <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/80 text-amber-200 text-xs space-y-1">
                   <div className="font-bold flex items-center gap-1.5 text-amber-300">
                     <AlertTriangle className="w-3.5 h-3.5" />
-                    <span>महत्त्वाचं (Final Decision Policy):</span>
+                    <span>Important (Policy):</span>
                   </div>
                   <p className="text-[11px] leading-relaxed text-zinc-200">
-                    AI Viva चा score हा विद्यार्थ्याच्या समजुतीचा एक संकेत (understanding indicator) म्हणून वापरावा; तो एकटाच अंतिम निर्णयासाठी पुरेसा नाही. अंतिम निर्णय शिक्षकाने (Teacher) घ्यावा.
+                    The AI Viva score serves as an understanding indicator; it is not solely sufficient for a final assessment decision. The final evaluation is made by the Teacher.
                   </p>
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 7: TOP RANKERS & COMPETITIVE LEADERBOARD (IMAGE 2)
+            ======================================================== */}
+        {activeTab === 'leaderboard' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-800 gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-950/80 border border-amber-700/80 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                    Official Standings
+                  </span>
+                  <span className="text-xs text-zinc-400">Batch 2026 Core OOP &amp; System Algorithms</span>
+                </div>
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Trophy className="w-6 h-6 text-amber-400" />
+                  <span>Top Rankers Leaderboard</span>
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Rankings dynamically weighted by sandboxed execution test suites, keystroke integrity scores, and daily coding streaks.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300">
+                  Global Leaderboard • Top 10
+                </span>
+              </div>
+            </div>
+
+            {/* Top 3 Podium Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {/* Rank 2 */}
+              <div className="p-5 rounded-3xl bg-zinc-900/60 border border-zinc-700/60 flex flex-col items-center text-center relative overflow-hidden order-2 md:order-1">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-zinc-600 flex items-center justify-center text-xl font-black text-zinc-300 mb-2 shadow">
+                  🥈
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Rank #2</span>
+                <h4 className="text-base font-bold text-white mt-0.5">{TOP_RANKERS[1].name}</h4>
+                <p className="text-xs text-zinc-400">{TOP_RANKERS[1].college}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-sm font-extrabold text-white font-mono">{TOP_RANKERS[1].score}%</span>
+                  <span className="text-xs text-orange-400 font-bold flex items-center gap-0.5">
+                    <Flame className="w-3.5 h-3.5" /> {TOP_RANKERS[1].streak}d
+                  </span>
+                </div>
+                <span className="mt-2 text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-indigo-300 border border-zinc-700 font-semibold">
+                  {TOP_RANKERS[1].badge}
+                </span>
+              </div>
+
+              {/* Rank 1 - Champion */}
+              <div className="p-6 rounded-3xl bg-gradient-to-b from-amber-950/40 via-zinc-900 to-zinc-950 border border-amber-600/70 flex flex-col items-center text-center relative overflow-hidden order-1 md:order-2 shadow-xl ring-1 ring-amber-500/30">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/80 flex items-center justify-center text-2xl font-black text-amber-300 mb-2 shadow-lg animate-bounce">
+                  👑
+                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-800">
+                  Top Ranker #1
+                </span>
+                <h4 className="text-lg font-black text-white mt-1.5">{TOP_RANKERS[0].name}</h4>
+                <p className="text-xs text-amber-200/80">{TOP_RANKERS[0].college}</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <span className="text-lg font-black text-amber-300 font-mono">{TOP_RANKERS[0].score}%</span>
+                  <span className="text-xs text-orange-400 font-extrabold flex items-center gap-0.5">
+                    <Flame className="w-4 h-4 fill-orange-400" /> {TOP_RANKERS[0].streak}d Streak
+                  </span>
+                </div>
+                <span className="mt-2 text-[11px] px-3 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold">
+                  {TOP_RANKERS[0].badge}
+                </span>
+              </div>
+
+              {/* Rank 3 */}
+              <div className="p-5 rounded-3xl bg-zinc-900/60 border border-zinc-700/60 flex flex-col items-center text-center relative overflow-hidden order-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-950/40 border border-amber-800/80 flex items-center justify-center text-xl font-black text-amber-400 mb-2 shadow">
+                  🥉
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Rank #3</span>
+                <h4 className="text-base font-bold text-white mt-0.5">{TOP_RANKERS[2].name}</h4>
+                <p className="text-xs text-zinc-400">{TOP_RANKERS[2].college}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-sm font-extrabold text-white font-mono">{TOP_RANKERS[2].score}%</span>
+                  <span className="text-xs text-orange-400 font-bold flex items-center gap-0.5">
+                    <Flame className="w-3.5 h-3.5" /> {TOP_RANKERS[2].streak}d
+                  </span>
+                </div>
+                <span className="mt-2 text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-indigo-300 border border-zinc-700 font-semibold">
+                  {TOP_RANKERS[2].badge}
+                </span>
+              </div>
+            </div>
+
+            {/* Complete Top Rankers Table */}
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-950/80 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-zinc-900/80 border-b border-zinc-800 text-zinc-400 font-bold uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3.5 px-4 text-center">Rank</th>
+                      <th className="py-3.5 px-4">Student Candidate</th>
+                      <th className="py-3.5 px-4">Campus / Institute</th>
+                      <th className="py-3.5 px-4 text-right">Mastery Score</th>
+                      <th className="py-3.5 px-4 text-center">Streak</th>
+                      <th className="py-3.5 px-4 text-center">Problems Solved</th>
+                      <th className="py-3.5 px-4 text-center">Tier Badge</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60">
+                    {TOP_RANKERS.map((ranker) => (
+                      <tr
+                        key={ranker.rank}
+                        className={`hover:bg-zinc-900/50 transition ${
+                          ranker.name.includes(candidateName) || (user?.name && ranker.name.includes(user.name))
+                            ? 'bg-indigo-950/30 font-semibold'
+                            : ''
+                        }`}
+                      >
+                        <td className="py-3.5 px-4 text-center font-mono font-bold">
+                          {ranker.rank === 1 ? '🥇 #1' : ranker.rank === 2 ? '🥈 #2' : ranker.rank === 3 ? '🥉 #3' : `#${ranker.rank}`}
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                          <span className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[11px] text-zinc-300 font-mono">
+                            {ranker.name.split(' ').map((n) => n[0]).join('')}
+                          </span>
+                          <span>{ranker.name}</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-zinc-400">{ranker.college}</td>
+                        <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-400">
+                          {ranker.score}%
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono text-orange-400 font-bold">
+                          🔥 {ranker.streak}d
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono text-zinc-300">
+                          {ranker.solved}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-800 font-medium">
+                            {ranker.badge}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 8: ABOUT US & ARCHITECTURE (IMAGE 2)
+            ======================================================== */}
+        {activeTab === 'about' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-800 gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-700/80 text-[10px] font-bold text-indigo-300 uppercase tracking-wider">
+                    Institutional Overview
+                  </span>
+                  <span className="text-xs text-zinc-400">Computer Science Education Engineering</span>
+                </div>
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Info className="w-6 h-6 text-indigo-400" />
+                  <span>About ReplayEd Platform</span>
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  An autonomous, AI-guided learning and assessment platform combining keystroke replay telemetry, local edge vision proctoring, and sandboxed code execution.
+                </p>
+              </div>
+              <span className="text-xs px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300">
+                v2.6 Enterprise Edition
+              </span>
+            </div>
+
+            {/* Mission & Architecture Pillars */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="p-6 rounded-3xl bg-zinc-900/60 border border-zinc-800 space-y-3">
+                <div className="flex items-center gap-2 text-indigo-400 font-bold text-sm uppercase tracking-wider">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Platform Vision &amp; Core Purpose</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  ReplayEd transforms programming education by replacing subjective evaluations with verifiable telemetry. Every keystroke, deletion, hesitation, and thought process is captured in an immutable chronological timeline, enabling fair and transparent skill assessment.
+                </p>
+                <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800 text-[11px] text-zinc-400 space-y-1">
+                  <div className="font-bold text-white font-sans">Objective Assessment Contract:</div>
+                  <div>• Zero server-side video uploads; 100% on-device face and gaze telemetry</div>
+                  <div>• Real-time Bayesian adaptive knowledge graph for personalized topic unlocking</div>
+                  <div>• Isolated microVM sandboxes eliminating arbitrary host execution risks</div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-zinc-900/60 border border-zinc-800 space-y-3">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>4 Foundational System Features</span>
+                </div>
+                <ul className="text-xs text-zinc-300 space-y-2">
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1 shrink-0" />
+                    <span><strong>Feature 1: AI-Based Adaptive Learning</strong> — Dynamically identifies conceptual deficits (e.g. Inheritance) and re-routes candidates through targeted remedial practice.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1 shrink-0" />
+                    <span><strong>Feature 2: Anti-Cheating Telemetry</strong> — Monaco keystroke logging, browser visibility tracking, and copy-paste interception without privacy invasion.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1 shrink-0" />
+                    <span><strong>Feature 3: Secure Coding Assessment</strong> — MicroVM sandboxed execution with hidden test cases, memory limits (512MB), and 5s timeout boundaries.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1 shrink-0" />
+                    <span><strong>Feature 4: AI Viva Voce System</strong> — Generates semantic questions based on the candidate&apos;s submitted code to evaluate true conceptual understanding.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Engineering & Faculty Team ("Er." titles as requested) */}
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-indigo-400" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                    Faculty &amp; Software Engineering Team
+                  </span>
+                </div>
+                <span className="text-xs text-zinc-400 font-mono">Department of Computer Engineering</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  {
+                    name: 'Er. Manthan Sakat',
+                    role: 'Lead Architect & Full-Stack Systems',
+                    experience: '5+ Yrs Distributed Systems',
+                    bio: 'Specializes in reactive architecture, telemetry streaming engines, and web sandbox isolation.',
+                  },
+                  {
+                    name: 'Er. Rohit Joshi',
+                    role: 'Proctoring & Vision AI Lead',
+                    experience: '4+ Yrs Edge ML & Vision',
+                    bio: 'Architected local MediaPipe face and gaze tracking pipelines with zero server video transit.',
+                  },
+                  {
+                    name: 'Er. Sneha Patil',
+                    role: 'Adaptive Engine & AI Specialist',
+                    experience: '4+ Yrs Knowledge Tracing',
+                    bio: 'Designed the Bayesian knowledge tracer and LLM-powered code explanation judge.',
+                  },
+                  {
+                    name: 'Er. Aditya Kulkarni',
+                    role: 'Sandbox Security & Cloud Systems',
+                    experience: '5+ Yrs Cloud Security',
+                    bio: 'Engineered Judge0 MicroVM container runners with kernel namespaces and resource caps.',
+                  },
+                ].map((member, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-2 hover:border-zinc-700 transition"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-indigo-950/80 border border-indigo-700/60 flex items-center justify-center text-sm font-bold text-indigo-300 font-mono">
+                      {member.name.split(' ')[1]?.[0] || 'E'}
+                    </div>
+                    <div className="font-bold text-white text-sm">{member.name}</div>
+                    <div className="text-[11px] font-semibold text-indigo-400">{member.role}</div>
+                    <div className="text-[10px] text-zinc-500 font-mono">{member.experience}</div>
+                    <p className="text-[11px] text-zinc-400 leading-snug pt-1 border-t border-zinc-800">
+                      {member.bio}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -2144,12 +3185,16 @@ export default function StudentPortal() {
           onCancel={() => setIsConsentOpen(false)}
         />
 
-        {/* Screen Lockout when Max Warnings Exceeded */}
+        {/* Screen Lockout when Max Warnings Exceeded with onExitToDashboard */}
         <LockedScreen
-          isLocked={isLocked}
-          warningCount={warningCount}
+          isLocked={isTestLocked || isLocked}
+          warningCount={integrityWarnings || warningCount}
           maxWarnings={maxWarnings}
-          onViewResults={() => setActiveTab('results')}
+          onExitToDashboard={handleExitToDashboardFromLock}
+          onViewResults={() => {
+            setIsTestLocked(false);
+            setActiveTab('results');
+          }}
         />
 
         {/* Non-blocking Paste Interception Toast */}

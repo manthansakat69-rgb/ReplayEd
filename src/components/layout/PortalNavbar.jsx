@@ -68,66 +68,99 @@ export default function PortalNavbar({
           </button>
         </div>
 
-        {/* Right Actions: Quick Role Switcher, User Badge, Sign Out */}
+        {/* Right Actions: Clean Student Profile & Sign Out vs Trainer Console */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Quick Landing Page link */}
-          <button
-            onClick={() => navigate('/')}
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 transition"
-            title="Back to Landing Page"
-          >
-            <Home className="w-3.5 h-3.5" />
-            <span>Landing Page</span>
-          </button>
+          {/* Trainer Portal Specific Links (Hidden on Student Dashboard as requested) */}
+          {currentRole !== ROLES.STUDENT && (
+            <>
+              {/* Quick Landing Page link */}
+              <button
+                onClick={() => navigate('/')}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 transition"
+                title="Back to Landing Page"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Landing Page</span>
+              </button>
 
-          {/* Admin Console Quick Link */}
-          <button
-            onClick={() => {
-              if (!navigator.onLine) {
-                alert('Network Error: WiFi / Internet is offline. Admin Console requires an active connection.');
-                return;
-              }
-              demoLogin(ROLES.ADMIN);
-              navigate('/admin');
-            }}
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 transition"
-            title="Open Admin Console"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-            <span>Admin Console</span>
-          </button>
+              {/* Admin Console Quick Link */}
+              <button
+                onClick={() => {
+                  if (!navigator.onLine) {
+                    alert('Network Error: WiFi / Internet is offline. Admin Console requires an active connection.');
+                    return;
+                  }
+                  demoLogin(ROLES.ADMIN);
+                  navigate('/admin');
+                }}
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 transition"
+                title="Open Admin Console"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                <span>Admin Console</span>
+              </button>
 
-          {/* Instant Switch between Student & Trainer for Judges/Testing */}
-          <button
-            onClick={handleRoleToggle}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 shadow-sm transition"
-            title={`Switch to ${currentRole === ROLES.STUDENT ? 'Trainer' : 'Student'} Portal`}
-          >
-            <ArrowLeftRight className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="hidden sm:inline">Switch to</span>
-            <span className="font-bold text-white">
-              {currentRole === ROLES.STUDENT ? 'Trainer' : 'Student'}
-            </span>
-          </button>
+              {/* Switch to Student */}
+              <button
+                onClick={handleRoleToggle}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 shadow-sm transition"
+                title="Switch to Student Portal"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="hidden sm:inline">Switch to</span>
+                <span className="font-bold text-white">Student</span>
+              </button>
 
-          {/* Live WiFi Status Indicator Pill */}
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-              isOnline
-                ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/60'
-                : 'bg-rose-950/80 text-rose-300 border-rose-800 animate-pulse'
-            }`}
-            title={isOnline ? 'WiFi / Network: Connected & Online' : 'WiFi Disconnected: No Internet connection'}
-          >
-            {isOnline ? (
-              <Wifi className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            ) : (
-              <WifiOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-            )}
-            <span className="hidden sm:inline text-[11px] font-semibold">
-              {isOnline ? 'WiFi Online' : 'WiFi Offline'}
-            </span>
-          </div>
+              {/* Live WiFi Status Indicator Pill (Trainer) */}
+              <div
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+                  isOnline
+                    ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/60'
+                    : 'bg-rose-950/80 text-rose-300 border-rose-800 animate-pulse'
+                }`}
+              >
+                {isOnline ? (
+                  <Wifi className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                ) : (
+                  <WifiOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                )}
+                <span className="hidden sm:inline text-[11px] font-semibold">
+                  {isOnline ? 'WiFi Online' : 'WiFi Offline'}
+                </span>
+              </div>
+            </>
+          )}
+
+          {/* Student-Only Quick Links: Top Rankers + About Us */}
+          {currentRole === ROLES.STUDENT && (
+            <>
+              <button
+                onClick={() => onTabChange && onTabChange('leaderboard')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                  activeTab === 'leaderboard'
+                    ? 'bg-amber-400/20 text-amber-300 border border-amber-500/50'
+                    : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80'
+                }`}
+                title="View Top Rankers Leaderboard"
+              >
+                <span>🏆</span>
+                <span className="hidden sm:inline font-bold">Top Rankers</span>
+              </button>
+
+              <button
+                onClick={() => onTabChange && onTabChange('about')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                  activeTab === 'about'
+                    ? 'bg-blue-400/20 text-blue-300 border border-blue-500/50'
+                    : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80'
+                }`}
+                title="About ReplayEd Platform"
+              >
+                <span>ℹ️</span>
+                <span className="hidden sm:inline font-bold">About Us</span>
+              </button>
+            </>
+          )}
 
           {/* Theme Toggle (Sun / Moon) */}
           <button
@@ -143,23 +176,24 @@ export default function PortalNavbar({
             )}
           </button>
 
-          {/* User Info Badge */}
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs">
+          {/* Student Profile Badge */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs shadow-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span className="font-medium text-zinc-300">
+            <span className="font-semibold text-white">
               {user?.name || (currentRole === ROLES.STUDENT ? 'Student Learner' : 'Trainer Faculty')}
             </span>
-            <span className="text-zinc-500">
-              {user?.studentId ? `(${user.studentId})` : currentRole === ROLES.STUDENT ? '(Enrolled)' : '(Trainer)'}
+            <span className="text-zinc-500 hidden sm:inline font-mono">
+              {user?.studentId ? `(${user.studentId})` : currentRole === ROLES.STUDENT ? '(Candidate)' : '(Trainer)'}
             </span>
           </div>
 
           {/* Sign Out */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-red-950/40 hover:bg-red-900/80 border border-red-800/70 transition"
+            title="Sign out of account"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5 text-red-400" />
             <span className="hidden sm:inline">Sign Out</span>
           </button>
         </div>

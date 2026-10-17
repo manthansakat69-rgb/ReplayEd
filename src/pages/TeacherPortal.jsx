@@ -981,7 +981,7 @@ export default function TeacherPortal() {
                 <span>Anti-Cheating Policy &amp; Signal Interpretation (Feature 2)</span>
               </div>
               <p className="text-zinc-300 leading-relaxed text-xs">
-                <strong>महत्त्वाचं:</strong> Tab switch किंवा मोठा paste (उदा. 50 lines) म्हणजे cheating झाल्याचा थेट पुरावा नाही. Browser मधून प्रत्येक बाहेरील application किंवा AI tool चा वापर १००% विश्वसनीयपणे detect करता येत नाही. म्हणून system संशयास्पद signals दाखवते; अंतिम निर्णय शिक्षकाने (Teacher) घ्यावा.
+                <strong>Important:</strong> A tab switch or block paste (e.g. 50 lines) is an integrity signal, not conclusive proof of cheating. Browsers cannot detect every external AI tool with 100% certainty. The system provides objective telemetry signals; the final judgment rests with the Teacher.
               </p>
             </div>
 
@@ -996,7 +996,7 @@ export default function TeacherPortal() {
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400 mt-0.5">
-                    विद्यार्थ्याच्या submitted code वरील ३ प्रश्नांची उत्तरे आणि AI analysis (LLM API + Submitted Code).
+                    Candidate answers to 3 core questions based on submitted code, evaluated with semantic LLM similarity analysis.
                   </p>
                 </div>
                 <span className="text-xs px-3 py-1 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold">
@@ -1032,9 +1032,9 @@ export default function TeacherPortal() {
                 <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
                   <div className="font-bold text-white flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                    <span>प्रश्न १: Output &amp; Complexity</span>
+                    <span>Question 1: Output &amp; Complexity</span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 italic">"या code चं output काय असेल?"</p>
+                  <p className="text-[11px] text-zinc-400 italic">"What will be the output and asymptotic complexity of this code?"</p>
                   <p className="text-xs text-zinc-200 leading-relaxed bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
                     {liveCandidateViva?.answers?.q1 ||
                       'Returns -1 on cache miss, updates item recency on get/put. O(1) average time complexity with O(capacity) auxiliary memory.'}
@@ -1045,9 +1045,9 @@ export default function TeacherPortal() {
                 <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
                   <div className="font-bold text-white flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                    <span>प्रश्न २: Approach &amp; Data Structures</span>
+                    <span>Question 2: Approach &amp; Data Structures</span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 italic">"तू हा approach का निवडला?"</p>
+                  <p className="text-[11px] text-zinc-400 italic">"Why did you choose this architectural and data structure approach?"</p>
                   <p className="text-xs text-zinc-200 leading-relaxed bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
                     {liveCandidateViva?.answers?.q2 ||
                       'Used hash map with doubly linked list to achieve strict O(1) eviction and lookup instead of O(N) array scans.'}
@@ -1058,9 +1058,9 @@ export default function TeacherPortal() {
                 <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
                   <div className="font-bold text-white flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                    <span>प्रश्न ३: Error Diagnostics &amp; Edge Cases</span>
+                    <span>Question 3: Error Diagnostics &amp; Edge Cases</span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 italic">"या code मध्ये error आल्यास तू कसा fix करशील?"</p>
+                  <p className="text-[11px] text-zinc-400 italic">"If an error or edge case occurs in this code, how would you diagnose and fix it?"</p>
                   <p className="text-xs text-zinc-200 leading-relaxed bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
                     {liveCandidateViva?.answers?.q3 ||
                       'Use sentinel dummy head/tail to prevent null pointer exceptions during eviction, and validate non-negative capacity.'}
