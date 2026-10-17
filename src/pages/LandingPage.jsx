@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
@@ -15,29 +15,32 @@ import {
   Sparkles,
   ExternalLink,
   ChevronRight,
+  Star,
+  CheckCircle2,
+  Mail,
+  Phone,
+  MapPin,
+  MessageSquare,
+  Send,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../config/mockUsers";
 
 /**
- * ReplayEd landing.
+ * ReplayEd Landing Page
  *
- * 1. Put crowd-loop.mp4 in /public
- * 2. Add the tagline font once (layout.tsx or globals.css):
- *      @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap");
- * 3. <ReplayedLanding />
- *
- * The crowd video loops forever and never pauses. In the slow-motion part of every
- * loop a spotlight follows ONE of the two people who already hold a phone in the video
- * (picked at random each loop). Logo, tagline and logins appear after the first light.
+ * Exact spotlight crowd video hero + Google Fonts (Archivo Black, Bricolage Grotesque, DM Sans)
+ * Connected interactive portals (Student, Trainer, Admin, Auth)
+ * Executive Team & Faculty Mentors (Dr. Vaibhavi Gulhane, Dr. Soham Gadhave, Dr. Pranjali Gaikwad, Dr. Gandharva Kolhe)
+ * High-fidelity Dark Footer with Interactive Stay-Informed Newsletter & Social Links
  */
 
 const VW = 1280; // crowd-loop.mp4 size
 const VH = 414;
 
-// [seconds, x, y] of each phone-holder's face in the 1280x414 clip (tracked from the video).
+// [seconds, x, y] of each phone-holder's face in the 1280x414 clip
 const TRACKS = {
-  "A": [
+  A: [
     [0.0, 266, 271], [0.1, 264, 271], [0.2, 260, 271], [0.3, 255, 271], [0.4, 251, 272],
     [0.5, 246, 273], [0.6, 242, 274], [0.7, 238, 276], [0.8, 233, 278], [0.9, 229, 281],
     [1.0, 222, 278], [1.1, 222, 278], [1.2, 218, 276], [1.3, 213, 274], [1.4, 209, 273],
@@ -48,7 +51,7 @@ const TRACKS = {
     [3.5, 112, 270], [3.6, 107, 270], [3.7, 103, 270], [3.8, 98, 271], [3.9, 94, 272],
     [4.0, 90, 273], [4.1, 90, 273]
   ],
-  "B": [
+  B: [
     [0.0, 1115, 286], [0.1, 1116, 286], [0.2, 1119, 287], [0.3, 1122, 288], [0.4, 1125, 290],
     [0.5, 1128, 291], [0.6, 1131, 290], [0.7, 1134, 288], [0.8, 1137, 287], [0.9, 1140, 286],
     [1.0, 1145, 284], [1.1, 1145, 284], [1.2, 1148, 283], [1.3, 1151, 282], [1.4, 1154, 282],
@@ -98,7 +101,14 @@ export default function ReplayedLanding({
   const tagRef = useRef(null);
   const loginsRef = useRef(null);
 
-  // Navigation Handlers linking all modules
+  // Newsletter state
+  const [emailSub, setEmailSub] = useState("");
+  const [subSuccess, setSubSuccess] = useState(false);
+
+  // Consult modal/toast state
+  const [consultModal, setConsultModal] = useState(null);
+
+  // Navigation Handlers connecting all platform modules
   const handleGoStudent = () => {
     demoLogin(ROLES.STUDENT);
     navigate("/student");
@@ -116,6 +126,17 @@ export default function ReplayedLanding({
 
   const handleGoLogin = (role = "student") => {
     navigate(`/login/${role}`);
+  };
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (emailSub.trim() && emailSub.includes("@")) {
+      setSubSuccess(true);
+      setTimeout(() => {
+        setEmailSub("");
+        setSubSuccess(false);
+      }, 4000);
+    }
   };
 
   useEffect(() => {
@@ -150,14 +171,14 @@ export default function ReplayedLanding({
         brandDone = true;
         timers.push(
           setTimeout(() => {
-            brandRef.current?.classList.add("rp-on");
-            tagRef.current?.classList.add("rp-on");
-          }, 200)
+            brandRef.current?.classList.add("on");
+            tagRef.current?.classList.add("on");
+          }, 150)
         );
         timers.push(
           setTimeout(() => {
-            loginsRef.current?.classList.add("rp-on");
-          }, 600)
+            loginsRef.current?.classList.add("on");
+          }, 400)
         );
       }
     };
@@ -194,11 +215,11 @@ export default function ReplayedLanding({
           brandDone = true;
           timers.push(
             setTimeout(() => {
-              brandRef.current?.classList.add("rp-on");
-              tagRef.current?.classList.add("rp-on");
-            }, 800)
+              brandRef.current?.classList.add("on");
+              tagRef.current?.classList.add("on");
+            }, 600)
           );
-          timers.push(setTimeout(() => loginsRef.current?.classList.add("rp-on"), 2000));
+          timers.push(setTimeout(() => loginsRef.current?.classList.add("on"), 1400));
         }
       }
       if (litRef.current) litRef.current.style.opacity = String(a);
@@ -221,10 +242,10 @@ export default function ReplayedLanding({
       revealBrandAndLogins();
     };
 
-    // Auto-reveal fallback: Gracefully reveal if video is not loaded within 1.2s
+    // Auto-reveal fallback ensures UI never stays blank even without media autoplay
     const fallbackTimer = setTimeout(() => {
       revealBrandAndLogins();
-    }, 1200);
+    }, 1000);
     timers.push(fallbackTimer);
 
     v.addEventListener("pause", onPause);
@@ -245,21 +266,208 @@ export default function ReplayedLanding({
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full bg-[#f6f6f6] text-[#0d0d0d] flex flex-col justify-between overflow-x-hidden selection:bg-zinc-800 selection:text-white">
+    <div className="landing-root min-h-screen w-full bg-[#f6f6f6] text-[#0d0d0d] flex flex-col justify-between overflow-x-hidden selection:bg-zinc-800 selection:text-white">
+      {/* Google Fonts imported as requested */}
       <style>{`
-        .rp-brand{opacity:0;transform:translateY(-14px) scale(.92);transition:opacity 0.8s,transform 0.8s}
-        .rp-tag{opacity:0;transform:scale(.96);transition:opacity 0.8s .2s,transform 0.8s .2s}
-        .rp-logins{opacity:0;transform:translateY(14px);visibility:hidden;transition:opacity 0.8s,transform 0.8s}
-        .rp-brand.rp-on,.rp-tag.rp-on,.rp-logins.rp-on{opacity:1;transform:none}
-        .rp-logins.rp-on{visibility:visible;pointer-events:auto}
+        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@500;600&display=swap');
+
+        :root {
+          --bg: #f6f6f6;
+          --ink: #0d0d0d;
+          --lamp: 255, 205, 70;
+          --accent: #f59e0b;
+          --display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+          --punch: "Archivo Black", Impact, "Arial Black", system-ui, sans-serif;
+          --body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+
+        .hero-scene {
+          position: relative;
+          min-height: 88vh;
+          width: 100%;
+          overflow: hidden;
+          background: var(--bg);
+        }
+
+        .crowd-container {
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          height: min(48vh, calc(100vw * 414 / 1280 * 1.1));
+          min-height: 230px;
+          -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 14%);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .crowd-container video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: 50% 100%;
+          display: block;
+        }
+
+        .lit-layer {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        .lamp-elem {
+          position: absolute;
+          top: 0;
+          width: 70px;
+          height: 14px;
+          border-radius: 0 0 14px 14px;
+          background: var(--ink);
+          z-index: 5;
+        }
+
+        .lamp-elem::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          bottom: -4px;
+          width: 26px;
+          height: 6px;
+          margin-left: -13px;
+          border-radius: 50%;
+          background: rgb(var(--lamp));
+          filter: blur(2px);
+        }
+
+        .cone-elem, .pool-elem {
+          position: absolute;
+          mix-blend-mode: multiply;
+          z-index: 3;
+        }
+
+        .cone-elem {
+          top: 0;
+          clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+          background: linear-gradient(to bottom, rgba(var(--lamp), .9), rgba(var(--lamp), .6) 60%, rgba(var(--lamp), .35));
+          filter: blur(2px);
+        }
+
+        .pool-elem {
+          border-radius: 50%;
+          background: radial-gradient(ellipse at center, rgba(var(--lamp), .95) 0, rgba(var(--lamp), .8) 42%, rgba(var(--lamp), 0) 70%);
+        }
+
+        .top-content {
+          position: relative;
+          padding-top: max(4.5vh, 28px);
+          padding-inline: 16px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          text-align: center;
+          z-index: 10;
+        }
+
+        .brand-box {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          opacity: 0;
+          transform: translateY(-14px) scale(.92);
+          transition: opacity 1s, transform 1s;
+        }
+        .brand-box.on { opacity: 1; transform: none; }
+
+        .mark-box {
+          width: 52px;
+          height: 52px;
+          border-radius: 15px;
+          background: var(--ink);
+          display: grid;
+          place-items: center;
+          box-shadow: 0 10px 24px rgba(0,0,0,.2);
+        }
+        .mark-box svg { width: 29px; height: 29px; color: #fff; }
+
+        .name-box {
+          font-family: var(--display);
+          font-weight: 800;
+          font-size: clamp(1.9rem, 5vw, 2.6rem);
+          letter-spacing: -.03em;
+          line-height: 1;
+          color: var(--ink);
+        }
+
+        .tag-headline {
+          font-family: var(--punch);
+          font-weight: 400;
+          font-synthesis: none;
+          text-transform: uppercase;
+          font-size: clamp(2.2rem, min(5vw, 8vh), 3.8rem);
+          line-height: .98;
+          letter-spacing: -.02em;
+          color: var(--ink);
+          max-width: 20ch;
+          text-wrap: balance;
+          opacity: 0;
+          transform: scale(.96);
+          transition: opacity 1s .3s, transform 1s .3s;
+        }
+        .tag-headline.on { opacity: 1; transform: none; }
+        .tag-headline .u { text-decoration: underline; text-decoration-thickness: .09em; text-underline-offset: .08em; }
+        .tag-headline .hl { background: linear-gradient(transparent 52%, rgb(var(--lamp)) 52%, rgb(var(--lamp)) 94%, transparent 94%); padding: 0 .06em; }
+
+        .logins-container {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 12px;
+          opacity: 0;
+          transform: translateY(14px);
+          transition: opacity 1s, transform 1s;
+          visibility: hidden;
+        }
+        .logins-container.on {
+          opacity: 1;
+          transform: none;
+          visibility: visible;
+          pointer-events: auto;
+        }
+
+        .custom-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 9px;
+          padding: 13px 28px;
+          border-radius: 999px;
+          font-family: var(--body);
+          font-weight: 600;
+          font-size: .92rem;
+          text-decoration: none;
+          border: 1.5px solid var(--ink);
+          transition: transform .2s, box-shadow .2s;
+          cursor: pointer;
+        }
+        .custom-btn:hover {
+          transform: translateY(-2px) scale(1.03);
+          box-shadow: 0 8px 18px rgba(0,0,0,.18);
+        }
+        .custom-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+        .custom-btn.dark { background: var(--ink); color: #fff; }
+        .custom-btn.light { background: #fff; color: var(--ink); }
+
+        @media (prefers-reduced-motion: reduce) {
+          .brand-box, .logins-container, .tag-headline { transition-duration: .01s; }
+        }
       `}</style>
 
       {/* ========================================================
-          TOP NAVIGATION BAR: Connects ALL pages together
+          GLOBAL NAVBAR: Connects ALL pages together
           ======================================================== */}
-      <header className="relative z-30 w-full border-b border-zinc-200/80 bg-white/85 backdrop-blur-md">
+      <header className="relative z-30 w-full border-b border-zinc-200/80 bg-white/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          {/* Brand Logo */}
+          {/* Brand Logo & Tag */}
           <div
             onClick={() => navigate("/")}
             className="flex items-center gap-2.5 cursor-pointer select-none group"
@@ -272,13 +480,13 @@ export default function ReplayedLanding({
                 ReplayEd
               </span>
               <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block -mt-0.5">
-                Adaptive Assessment System
+                Interactive Coding &amp; Continuous Telemetry
               </span>
             </div>
           </div>
 
-          {/* Quick-Nav Links to All Portals */}
-          <nav className="flex items-center gap-1.5 sm:gap-2">
+          {/* Quick Links Connecting All Portals */}
+          <nav className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={handleGoStudent}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition"
@@ -319,108 +527,55 @@ export default function ReplayedLanding({
       </header>
 
       {/* ========================================================
-          HERO SECTION: Crowd Video Loop + Animated Spotlight + Tagline
+          HERO SCENE: Exact Crowd Video Loop + Animated Spotlight
           ======================================================== */}
-      <main className="relative flex-1 flex flex-col items-center justify-start pt-8 sm:pt-14 pb-32 px-4 z-10">
-        {/* crowd video: loops by itself, never pauses */}
-        <div
-          ref={crowdRef}
-          className="absolute inset-x-0 bottom-0 min-h-[200px] pointer-events-none z-0"
-          style={{
-            height: "min(46vh, calc(100vw * 414 / 1280 * 1.1))",
-            maskImage: "linear-gradient(to bottom, transparent 0, #000 14%)",
-            WebkitMaskImage: "linear-gradient(to bottom, transparent 0, #000 14%)",
-          }}
-        >
+      <section className="hero-scene">
+        {/* crowd video loops at bottom */}
+        <div ref={crowdRef} className="crowd-container">
           <video
             ref={videoRef}
-            src={videoSrc}
+            id="v"
             muted
             loop
-            autoPlay
             playsInline
+            autoPlay
             preload="auto"
-            className="h-full w-full object-cover"
-            style={{ objectPosition: "50% 100%" }}
+            src={videoSrc}
           />
         </div>
 
         {/* spotlight that follows one phone-holder */}
-        <div ref={litRef} className="pointer-events-none absolute inset-0 z-[2]" style={{ opacity: 0 }}>
-          <div ref={lampRef} className="absolute top-0 z-[3] h-3.5 w-[70px] rounded-b-2xl bg-[#0d0d0d]" />
-          <div
-            ref={coneRef}
-            className="absolute top-0 z-[1]"
-            style={{
-              clipPath: "polygon(44% 0, 56% 0, 100% 100%, 0 100%)",
-              background:
-                "linear-gradient(to bottom, rgba(255,205,70,.9), rgba(255,205,70,.6) 60%, rgba(255,205,70,.35))",
-              mixBlendMode: "multiply",
-              filter: "blur(2px)",
-            }}
-          />
-          <div
-            ref={poolRef}
-            className="absolute z-[1]"
-            style={{
-              borderRadius: "50%",
-              background:
-                "radial-gradient(ellipse at center, rgba(255,205,70,.95) 0, rgba(255,205,70,.8) 42%, rgba(255,205,70,0) 70%)",
-              mixBlendMode: "multiply",
-            }}
-          />
+        <div ref={litRef} id="lit" className="lit-layer">
+          <div ref={lampRef} className="lamp-elem" />
+          <div ref={coneRef} className="cone-elem" />
+          <div ref={poolRef} className="pool-elem" />
         </div>
 
-        {/* Central Logo + Tagline + Hero Action Buttons */}
-        <div className="relative z-20 flex flex-col items-center gap-4 text-center max-w-4xl mx-auto">
-          {/* Animated ReplayEd Logo Icon */}
-          <div ref={brandRef} className="rp-brand flex items-center gap-3">
-            <div className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-[#0d0d0d] shadow-lg">
-              <RotateCcw className="h-7 w-7 text-white" />
+        {/* logo + huge tagline + logins sitting above the crowd */}
+        <div className="top-content">
+          <div ref={brandRef} className="brand-box">
+            <div className="mark-box">
+              <RotateCcw className="w-7 h-7" />
             </div>
-            <span className="text-[clamp(1.9rem,5vw,2.6rem)] font-extrabold leading-none tracking-tight">
-              ReplayEd
-            </span>
+            <div className="name-box">ReplayEd</div>
           </div>
 
-          {/* Huge Tagline (Archivo Black Font) */}
-          <h1
-            ref={tagRef}
-            className="rp-tag max-w-[20ch] text-balance uppercase leading-[.98] tracking-[-0.02em]"
-            style={{
-              fontFamily: '"Archivo Black", Impact, "Arial Black", system-ui, sans-serif',
-              fontWeight: 400,
-              fontSynthesis: "none",
-              fontSize: "clamp(2.1rem, min(5vw, 7.5vh), 3.8rem)",
-            }}
-          >
+          <h1 ref={tagRef} className="tag-headline">
             Don&apos;t be ordinary with other apps. Use{" "}
-            <span className="underline decoration-[.09em] underline-offset-[.08em]">ReplayEd</span> and be{" "}
-            <span
-              className="px-[.06em]"
-              style={{
-                background:
-                  "linear-gradient(transparent 52%, rgb(255,205,70) 52%, rgb(255,205,70) 94%, transparent 94%)",
-              }}
-            >
-              extraordinary.
-            </span>
+            <span className="u">ReplayEd</span> and be{" "}
+            <span className="hl">extraordinary.</span>
           </h1>
 
-          {/* Dynamic Buttons connecting directly to portals & login */}
-          <div
-            ref={loginsRef}
-            className="rp-logins flex flex-wrap justify-center items-center gap-3 pt-2"
-          >
+          <div ref={loginsRef} className="logins-container">
             <a
               href={studentHref}
               onClick={(e) => {
                 e.preventDefault();
                 handleGoLogin("student");
               }}
-              className="flex items-center gap-2 rounded-full border-[1.5px] border-[#0d0d0d] bg-[#0d0d0d] px-7 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg cursor-pointer shadow-md"
+              className="custom-btn dark"
             >
-              <GraduationCap className="h-4 w-4" />
+              <GraduationCap className="w-4 h-4" />
               <span>Student Login</span>
             </a>
 
@@ -430,136 +585,546 @@ export default function ReplayedLanding({
                 e.preventDefault();
                 handleGoLogin("teacher");
               }}
-              className="flex items-center gap-2 rounded-full border-[1.5px] border-[#0d0d0d] bg-white px-7 py-3 text-sm font-semibold text-[#0d0d0d] transition hover:-translate-y-0.5 hover:shadow-lg cursor-pointer shadow-sm hover:border-black"
+              className="custom-btn light"
             >
-              <BookOpen className="h-4 w-4" />
+              <BookOpen className="w-4 h-4" />
               <span>Teacher Login</span>
             </a>
 
-            {/* Instant Demo Sandbox Shortcut */}
+            {/* Instant Demo Sandbox Access */}
             <button
               onClick={handleGoStudent}
-              className="flex items-center gap-1.5 rounded-full border border-zinc-300 bg-zinc-100 hover:bg-zinc-200 px-5 py-3 text-xs font-bold text-zinc-800 transition hover:-translate-y-0.5 shadow-xs"
+              className="custom-btn light border-dashed border-zinc-400 bg-zinc-50"
               title="Instant Sandbox Access without credentials"
             >
-              <Play className="h-3 w-3 fill-current text-zinc-900" />
+              <Play className="w-3.5 h-3.5 fill-current text-zinc-800" />
               <span>Instant Sandbox Demo</span>
             </button>
           </div>
         </div>
-      </main>
+      </section>
 
       {/* ========================================================
-          BOTTOM PORTALS HUB: Seamlessly connects all 4 portals
+          PORTAL NAVIGATION TILES: Instant One-Click Access
           ======================================================== */}
-      <footer className="relative z-20 w-full border-t border-zinc-200/90 bg-white/95 backdrop-blur-md py-6 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] uppercase tracking-wider font-bold text-zinc-500">
+      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-extrabold text-zinc-950 tracking-tight">
               Interactive Application Portals
-            </span>
-            <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              All Systems &amp; APIs Live
+            </h2>
+            <p className="text-xs text-zinc-500 font-medium">
+              Seamlessly navigate across all 4 operational modules of ReplayEd.
+            </p>
+          </div>
+          <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            All Systems Online
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 1. Student Portal Tile */}
+          <div
+            onClick={handleGoStudent}
+            className="p-5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-zinc-900">
+                  <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                  <span>Student Assessment</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <p className="text-xs text-zinc-500 leading-relaxed mt-2">
+                Adaptive OOP curriculum, Monaco code editor, gaze calibration, and live camera verification.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-zinc-900 mt-4 inline-flex items-center gap-1 group-hover:underline">
+              Enter Student Portal →
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* 1. Student Portal Card */}
-            <div
-              onClick={handleGoStudent}
-              className="p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 text-xs font-bold text-zinc-900">
-                    <GraduationCap className="w-4 h-4 text-zinc-800" />
-                    <span>Student Assessment</span>
+          {/* 2. Trainer Console Tile */}
+          <div
+            onClick={handleGoTeacher}
+            className="p-5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-zinc-900">
+                  <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+                    <BookOpen className="w-4 h-4" />
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-1 transition-transform" />
+                  <span>Trainer Console</span>
                 </div>
-                <p className="text-[11px] text-zinc-500 leading-snug">
-                  Adaptive curriculum, Monaco code editor, gaze calibration, and live camera verification.
+                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <p className="text-xs text-zinc-500 leading-relaxed mt-2">
+                Keystroke telemetry replay, integrity look-away signal inspection, and viva explanation evaluation.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-zinc-900 mt-4 inline-flex items-center gap-1 group-hover:underline">
+              Open Trainer Console →
+            </span>
+          </div>
+
+          {/* 3. Admin Console Tile */}
+          <div
+            onClick={handleGoAdmin}
+            className="p-5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-zinc-900">
+                  <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <span>Institutional Admin</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <p className="text-xs text-zinc-500 leading-relaxed mt-2">
+                Cluster health, student cohort management, course prerequisites, and audit security telemetry.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-zinc-900 mt-4 inline-flex items-center gap-1 group-hover:underline">
+              Open Admin Dashboard →
+            </span>
+          </div>
+
+          {/* 4. Login & Authentication Tile */}
+          <div
+            onClick={() => handleGoLogin("student")}
+            className="p-5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-zinc-900">
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                    <Terminal className="w-4 h-4" />
+                  </div>
+                  <span>Unified Auth &amp; Login</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <p className="text-xs text-zinc-500 leading-relaxed mt-2">
+                WiFi connectivity verification, strict @gmail.com validation, and password strength evaluation.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-zinc-900 mt-4 inline-flex items-center gap-1 group-hover:underline">
+              Go to Authentication →
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          EXECUTIVE TEAM & FACULTY CONSULTANTS
+          (Matching the user's provided medivance team showcase)
+          ======================================================== */}
+      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-zinc-200 text-zinc-800 inline-block mb-2">
+            Research &amp; Engineering Faculty
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight">
+            Meet the Minds Behind ReplayEd
+          </h2>
+          <p className="text-sm text-zinc-600 mt-2">
+            Pioneering adaptive AI, sandboxed security kernels, and forensic keystroke telemetry.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Consultant 1: Dr. Vaibhavi Gulhane */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
+                <img
+                  src="./team-vaibhavi.png"
+                  alt="Dr. Vaibhavi Gulhane"
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-5">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 mb-2">
+                  Neurologist &amp; Cognitive AI
+                </span>
+                <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                  Dr. Vaibhavi Gulhane
+                </h3>
+                <p className="text-xs font-semibold text-zinc-500">10+ Years Experience</p>
+
+                {/* Rating */}
+                <div className="flex items-center gap-1 my-2.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  ))}
+                  <span className="text-xs font-bold text-zinc-800 ml-1">5.0 (210 Reviews)</span>
+                </div>
+
+                <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                  &ldquo;Pioneering the cognitive load and adaptive knowledge tracking engine for student retention.&rdquo;
                 </p>
               </div>
-              <span className="text-[10px] font-bold text-zinc-900 mt-2.5 inline-flex items-center gap-1">
-                Enter Student Portal →
-              </span>
             </div>
 
-            {/* 2. Trainer Console Card */}
-            <div
-              onClick={handleGoTeacher}
-              className="p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 text-xs font-bold text-zinc-900">
-                    <BookOpen className="w-4 h-4 text-zinc-800" />
-                    <span>Trainer Console</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <p className="text-[11px] text-zinc-500 leading-snug">
-                  Keystroke telemetry replay, integrity look-away signal inspection, and viva explanation evaluation.
-                </p>
-              </div>
-              <span className="text-[10px] font-bold text-zinc-900 mt-2.5 inline-flex items-center gap-1">
-                Open Trainer Console →
-              </span>
-            </div>
-
-            {/* 3. Admin Console Card */}
-            <div
-              onClick={handleGoAdmin}
-              className="p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 text-xs font-bold text-zinc-900">
-                    <ShieldCheck className="w-4 h-4 text-zinc-800" />
-                    <span>Institutional Admin</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <p className="text-[11px] text-zinc-500 leading-snug">
-                  Cluster health, student cohort management, course prerequisites, and audit security telemetry.
-                </p>
-              </div>
-              <span className="text-[10px] font-bold text-zinc-900 mt-2.5 inline-flex items-center gap-1">
-                Open Admin Dashboard →
-              </span>
-            </div>
-
-            {/* 4. Login & Authentication Card */}
-            <div
-              onClick={() => handleGoLogin("student")}
-              className="p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 text-xs font-bold text-zinc-900">
-                    <Terminal className="w-4 h-4 text-zinc-800" />
-                    <span>Unified Auth &amp; Login</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <p className="text-[11px] text-zinc-500 leading-snug">
-                  WiFi connectivity verification, strong @gmail.com validation, and password strength evaluation.
-                </p>
-              </div>
-              <span className="text-[10px] font-bold text-zinc-900 mt-2.5 inline-flex items-center gap-1">
-                Go to Authentication →
-              </span>
+            <div className="p-5 pt-0">
+              <button
+                onClick={() => setConsultModal("Dr. Vaibhavi Gulhane")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+              >
+                Book Consult
+              </button>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-zinc-200/60 flex flex-wrap items-center justify-between text-[11px] text-zinc-400">
-            <span>&copy; {new Date().getFullYear()} ReplayEd Inc. Adaptive Coding &amp; Continuous Telemetry.</span>
-            <span>Hosted via GitHub Actions on GitHub Pages</span>
+          {/* Consultant 2: Dr. Soham Gadhave */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
+                <img
+                  src="./team-soham.png"
+                  alt="Dr. Soham Gadhave"
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-5">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-2">
+                  Cardiologist &amp; Sandbox Security
+                </span>
+                <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                  Dr. Soham Gadhave
+                </h3>
+                <p className="text-xs font-semibold text-zinc-500">15+ Years Experience</p>
+
+                {/* Rating */}
+                <div className="flex items-center gap-1 my-2.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  ))}
+                  <span className="text-xs font-bold text-zinc-800 ml-1">4.8 (95 Reviews)</span>
+                </div>
+
+                <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                  &ldquo;Architect of the isolated sandbox ensuring 512MB RAM and sub-5s secure execution limits.&rdquo;
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 pt-0">
+              <button
+                onClick={() => setConsultModal("Dr. Soham Gadhave")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+              >
+                Book Consult
+              </button>
+            </div>
+          </div>
+
+          {/* Consultant 3: Dr. Pranjali Gaikwad */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
+                <img
+                  src="./team-pranjali.png"
+                  alt="Dr. Pranjali Gaikwad"
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-5">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200 mb-2">
+                  Gynecologist &amp; AI Viva Voce
+                </span>
+                <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                  Dr. Pranjali Gaikwad
+                </h3>
+                <p className="text-xs font-semibold text-zinc-500">12+ Years Experience</p>
+
+                {/* Rating */}
+                <div className="flex items-center gap-1 my-2.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  ))}
+                  <span className="text-xs font-bold text-zinc-800 ml-1">4.9 (128 Reviews)</span>
+                </div>
+
+                <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                  &ldquo;Lead designer of the AI Viva Voce system evaluating student semantic understanding.&rdquo;
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 pt-0">
+              <button
+                onClick={() => setConsultModal("Dr. Pranjali Gaikwad")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+              >
+                Book Consult
+              </button>
+            </div>
+          </div>
+
+          {/* Consultant 4: Dr. Gandharva Kolhe */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-zinc-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div className="h-56 w-full overflow-hidden bg-zinc-100 relative">
+                <img
+                  src="./team-gandharva.png"
+                  alt="Dr. Gandharva Kolhe"
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-5">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                  Pediatrician &amp; Keystroke Forensics
+                </span>
+                <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                  Dr. Gandharva Kolhe
+                </h3>
+                <p className="text-xs font-semibold text-zinc-500">8+ Years Experience</p>
+
+                {/* Rating */}
+                <div className="flex items-center gap-1 my-2.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  ))}
+                  <span className="text-xs font-bold text-zinc-800 ml-1">4.9 (160 Reviews)</span>
+                </div>
+
+                <p className="text-xs italic text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                  &ldquo;Engineered real-time keystroke dynamics, paste anomaly flags, and gaze tracking.&rdquo;
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 pt-0">
+              <button
+                onClick={() => setConsultModal("Dr. Gandharva Kolhe")}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+              >
+                Book Consult
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          DARK FOOTER (Matching the user's provided medivance footer)
+          ======================================================== */}
+      <footer className="w-full bg-[#0d1627] text-white pt-14 pb-8 px-4 sm:px-6 border-t border-zinc-800">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-zinc-800/80">
+          {/* Brand & Description */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md">
+                <RotateCcw className="h-6 w-6" />
+              </div>
+              <span className="text-xl font-black tracking-tight text-white">
+                ReplayEd
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed mb-5 max-w-sm">
+              ReplayEd is revolutionizing interactive coding assessment and clinical education.
+              Book consultations, track adaptive mastery, replay keystroke telemetry, and verify student integrity on demand.
+            </p>
+            {/* Social Icons */}
+            <div className="flex items-center gap-2.5">
+              <a
+                href="#facebook"
+                onClick={(e) => e.preventDefault()}
+                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-blue-600 flex items-center justify-center text-zinc-300 hover:text-white transition"
+                aria-label="Facebook"
+              >
+                <span className="text-xs font-bold">f</span>
+              </a>
+              <a
+                href="#twitter"
+                onClick={(e) => e.preventDefault()}
+                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-blue-400 flex items-center justify-center text-zinc-300 hover:text-white transition"
+                aria-label="Twitter"
+              >
+                <span className="text-xs font-bold">t</span>
+              </a>
+              <a
+                href="#instagram"
+                onClick={(e) => e.preventDefault()}
+                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-pink-600 flex items-center justify-center text-zinc-300 hover:text-white transition"
+                aria-label="Instagram"
+              >
+                <span className="text-xs font-bold">in</span>
+              </a>
+              <a
+                href="#linkedin"
+                onClick={(e) => e.preventDefault()}
+                className="w-8 h-8 rounded-full bg-zinc-800/90 hover:bg-blue-500 flex items-center justify-center text-zinc-300 hover:text-white transition"
+                aria-label="LinkedIn"
+              >
+                <span className="text-xs font-bold">li</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
+              Quick Links
+            </h3>
+            <ul className="space-y-2 text-xs text-zinc-400">
+              <li>
+                <button
+                  onClick={() => navigate("/")}
+                  className="hover:text-white transition text-left"
+                >
+                  Home
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={handleGoStudent}
+                  className="hover:text-white transition text-left"
+                >
+                  Student Assessment Portal
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={handleGoTeacher}
+                  className="hover:text-white transition text-left"
+                >
+                  Trainer Replay Console
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={handleGoAdmin}
+                  className="hover:text-white transition text-left"
+                >
+                  Institutional Dashboard
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleGoLogin("student")}
+                  className="hover:text-white transition text-left"
+                >
+                  Unified Auth &amp; Login
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={handleGoStudent}
+                  className="hover:text-white transition text-left"
+                >
+                  Instant Sandbox Demo
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact & Support */}
+          <div>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
+              Contact &amp; Support
+            </h3>
+            <ul className="space-y-3 text-xs text-zinc-400">
+              <li className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <span>100 Health &amp; Tech Way, CA 94107</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>+1 (800) 555-CARE (2273)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Mail className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>support@replayed.edu / medivance.health</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Stay Informed Newsletter */}
+          <div>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">
+              Stay Informed
+            </h3>
+            <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
+              Subscribe for updates on health advice, clinical benchmarks, and new AI features.
+            </p>
+
+            <form onSubmit={handleSubscribe} className="space-y-2.5">
+              <input
+                type="email"
+                required
+                value={emailSub}
+                onChange={(e) => setEmailSub(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+              <button
+                type="submit"
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-1.5"
+              >
+                <span>Subscribe</span>
+                <Send className="w-3.5 h-3.5" />
+              </button>
+              {subSuccess && (
+                <div className="flex items-center gap-1.5 text-xs text-emerald-400 pt-1">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Subscribed successfully! Thank you.</span>
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3">
+          <p>&copy; {new Date().getFullYear()} ReplayEd Health Tech Inc. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-zinc-400">
+            <span className="hover:text-white transition cursor-pointer">Privacy Policy</span>
+            <span className="hover:text-white transition cursor-pointer">Terms of Service</span>
+            <span className="hover:text-white transition cursor-pointer">HIPAA &amp; FERPA Compliance</span>
           </div>
         </div>
       </footer>
+
+      {/* Floating Chat / Support Badge */}
+      <div
+        onClick={() => setConsultModal("Clinical Support Desk")}
+        className="fixed bottom-6 right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-full shadow-2xl cursor-pointer hover:scale-110 transition-transform flex items-center justify-center"
+        title="Live Support Chat"
+      >
+        <MessageSquare className="w-5 h-5" />
+      </div>
+
+      {/* Consult Confirmation Modal */}
+      {consultModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-zinc-200 shadow-2xl text-center">
+            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-extrabold text-zinc-950 mb-1">
+              Consultation Scheduled
+            </h3>
+            <p className="text-xs text-zinc-600 mb-4 leading-relaxed">
+              Your consultation request with <strong className="text-zinc-900">{consultModal}</strong> has been logged in ReplayEd Telehealth &amp; Academic registry.
+            </p>
+            <button
+              onClick={() => setConsultModal(null)}
+              className="w-full py-2.5 rounded-xl bg-[#0d0d0d] text-white text-xs font-bold hover:bg-zinc-800 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
