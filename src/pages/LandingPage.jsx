@@ -25,6 +25,8 @@ import {
   Code2,
   Cpu,
   Fingerprint,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../config/mockUsers";
@@ -132,7 +134,15 @@ export default function ReplayedLanding({
   };
 
   const handleGoLogin = (role = "student") => {
-    navigate(`/login/${role}`);
+    navigate(`/login/${role}?mode=signin`);
+  };
+
+  const handleGoSignIn = (role = "student") => {
+    navigate(`/login/${role}?mode=signin`);
+  };
+
+  const handleGoRegister = (role = "student") => {
+    navigate(`/login/${role}?mode=register`);
   };
 
   const handleSubscribe = (e) => {
@@ -492,42 +502,21 @@ export default function ReplayedLanding({
             </div>
           </div>
 
-          {/* Quick Links Connecting All Portals */}
-          <nav className="flex items-center gap-1 sm:gap-2">
+          {/* Sign In & Register Navigation */}
+          <nav className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={handleGoStudent}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition"
-              title="Open Student Learning & Assessment Portal"
+              onClick={() => handleGoSignIn("student")}
+              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition cursor-pointer"
             >
-              <GraduationCap className="w-3.5 h-3.5 text-zinc-600" />
-              <span className="hidden sm:inline">Student Portal</span>
+              Sign In
             </button>
 
             <button
-              onClick={handleGoTeacher}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition"
-              title="Open Trainer Console & Keystroke Replay"
+              onClick={() => handleGoRegister("student")}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm cursor-pointer"
             >
-              <BookOpen className="w-3.5 h-3.5 text-zinc-600" />
-              <span className="hidden sm:inline">Trainer Console</span>
-            </button>
-
-            <button
-              onClick={handleGoAdmin}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition"
-              title="Open Institutional Admin Dashboard"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-zinc-600" />
-              <span className="hidden md:inline">Admin</span>
-            </button>
-
-            {/* Direct Sign-In Button */}
-            <button
-              onClick={() => handleGoLogin("student")}
-              className="flex items-center gap-1 px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-[#0d0d0d] hover:bg-zinc-800 transition shadow-sm ml-1"
-            >
-              <span>Sign In</span>
-              <ArrowRight className="w-3 h-3" />
+              <span>Register</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </nav>
         </div>
@@ -574,38 +563,20 @@ export default function ReplayedLanding({
           </h1>
 
           <div ref={loginsRef} className="logins-container">
-            <a
-              href={studentHref}
-              onClick={(e) => {
-                e.preventDefault();
-                handleGoLogin("student");
-              }}
+            <button
+              onClick={() => handleGoSignIn("student")}
               className="custom-btn dark"
             >
-              <GraduationCap className="w-4 h-4" />
-              <span>Student Login</span>
-            </a>
+              <LogIn className="w-4 h-4" />
+              <span>Sign In</span>
+            </button>
 
-            <a
-              href={teacherHref}
-              onClick={(e) => {
-                e.preventDefault();
-                handleGoLogin("teacher");
-              }}
+            <button
+              onClick={() => handleGoRegister("student")}
               className="custom-btn light"
             >
-              <BookOpen className="w-4 h-4" />
-              <span>Teacher Login</span>
-            </a>
-
-            {/* Instant Demo Sandbox Access */}
-            <button
-              onClick={handleGoStudent}
-              className="custom-btn light border-dashed border-zinc-400 bg-zinc-50"
-              title="Instant Sandbox Access without credentials"
-            >
-              <Play className="w-3.5 h-3.5 fill-current text-zinc-800" />
-              <span>Instant Sandbox Demo</span>
+              <UserPlus className="w-4 h-4" />
+              <span>Create Account</span>
             </button>
           </div>
         </div>

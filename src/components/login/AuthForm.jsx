@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, Wifi, WifiOff, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { login, register } from '../../services/api';
@@ -8,10 +8,27 @@ import { STUDENT_BATCHES, MOCK_USERS_MAP, ROLES } from '../../config/mockUsers';
 
 export default function AuthForm({ activeRole }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { loginUser, demoLogin } = useAuth();
 
-  // Mode: 'signin' | 'register'
-  const [mode, setMode] = useState('signin');
+  // Mode: 'signin' | 'register' (connected to landing page query param)
+  const resolveInitialMode = () => {
+    const qMode = searchParams.get('mode') || location.state?.mode;
+    if (qMode === 'register' || qMode === 'signup' || qMode === 'create') return 'register';
+    return 'signin';
+  };
+
+  const [mode, setMode] = useState(resolveInitialMode);
+
+  useEffect(() => {
+    const qMode = searchParams.get('mode') || location.state?.mode;
+    if (qMode === 'register' || qMode === 'signup' || qMode === 'create') {
+      setMode('register');
+    } else if (qMode === 'signin' || qMode === 'login') {
+      setMode('signin');
+    }
+  }, [searchParams, location.state]);
 
   // Form Fields
   const [fullName, setFullName] = useState('');
