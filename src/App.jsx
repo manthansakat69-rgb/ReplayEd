@@ -16,6 +16,7 @@ export default function App() {
 
       {/* 2. Public Shared Login / Signup System */}
       <Route path="/login" element={<Login />} />
+      <Route path="/login/:roleParam" element={<Login />} />
 
       {/* 3. Student Portal (Protected, with all 6 modules) */}
       <Route

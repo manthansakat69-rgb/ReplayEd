@@ -1,447 +1,327 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Logo from '../components/login/Logo';
-import { useAuth } from '../context/AuthContext';
-import { ROLES } from '../config/mockUsers';
-import {
-  Play,
-  ArrowRight,
-  ShieldCheck,
-  Brain,
-  Terminal,
-  Activity,
-  Layers,
-  CheckCircle2,
-  AlertTriangle,
-  GraduationCap,
-  Presentation,
-  Clock,
-  Sparkles,
-} from 'lucide-react';
+"use client";
 
-export default function LandingPage() {
+import { BookOpen, GraduationCap, RotateCcw } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+
+/**
+ * ReplayEd landing.
+ *
+ * 1. Put crowd-loop.mp4 in /public
+ * 2. Add the tagline font once (layout.tsx or globals.css):
+ *      @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap");
+ * 3. <ReplayedLanding />
+ *
+ * The crowd video loops forever and never pauses. In the slow-motion part of every
+ * loop a spotlight follows ONE of the two people who already hold a phone in the video
+ * (picked at random each loop). Logo, tagline and logins appear after the first light.
+ */
+
+const VW = 1280; // crowd-loop.mp4 size
+const VH = 414;
+
+// [seconds, x, y] of each phone-holder's face in the 1280x414 clip (tracked from the video).
+const TRACKS = {
+  "A": [
+    [0.0, 266, 271], [0.1, 264, 271], [0.2, 260, 271], [0.3, 255, 271], [0.4, 251, 272],
+    [0.5, 246, 273], [0.6, 242, 274], [0.7, 238, 276], [0.8, 233, 278], [0.9, 229, 281],
+    [1.0, 222, 278], [1.1, 222, 278], [1.2, 218, 276], [1.3, 213, 274], [1.4, 209, 273],
+    [1.5, 205, 272], [1.6, 200, 271], [1.7, 193, 270], [1.8, 189, 270], [1.9, 184, 270],
+    [2.0, 180, 270], [2.1, 175, 271], [2.2, 168, 273], [2.3, 168, 273], [2.4, 164, 274],
+    [2.5, 159, 276], [2.6, 155, 278], [2.7, 150, 279], [2.8, 146, 277], [2.9, 141, 275],
+    [3.0, 137, 273], [3.1, 132, 272], [3.2, 128, 271], [3.3, 121, 270], [3.4, 116, 270],
+    [3.5, 112, 270], [3.6, 107, 270], [3.7, 103, 270], [3.8, 98, 271], [3.9, 94, 272],
+    [4.0, 90, 273], [4.1, 90, 273]
+  ],
+  "B": [
+    [0.0, 1115, 286], [0.1, 1116, 286], [0.2, 1119, 287], [0.3, 1122, 288], [0.4, 1125, 290],
+    [0.5, 1128, 291], [0.6, 1131, 290], [0.7, 1134, 288], [0.8, 1137, 287], [0.9, 1140, 286],
+    [1.0, 1145, 284], [1.1, 1145, 284], [1.2, 1148, 283], [1.3, 1151, 282], [1.4, 1154, 282],
+    [1.5, 1157, 282], [1.6, 1160, 282], [1.7, 1165, 282], [1.8, 1168, 282], [1.9, 1171, 282],
+    [2.0, 1174, 282], [2.1, 1177, 282], [2.2, 1182, 283], [2.3, 1182, 283], [2.4, 1185, 284],
+    [2.5, 1188, 285], [2.6, 1191, 286], [2.7, 1194, 287], [2.8, 1197, 288], [2.9, 1200, 290],
+    [3.0, 1203, 291], [3.1, 1206, 289], [3.2, 1209, 288], [3.3, 1214, 286], [3.4, 1217, 285],
+    [3.5, 1220, 284], [3.6, 1223, 283], [3.7, 1226, 282], [3.8, 1229, 282], [3.9, 1232, 282],
+    [4.0, 1233, 282], [4.1, 1233, 282]
+  ]
+};
+const END = TRACKS.A[TRACKS.A.length - 1][0];
+
+const at = (track, t) => {
+  if (t <= track[0][0]) return track[0];
+  for (let i = 1; i < track.length; i++) {
+    if (t <= track[i][0]) {
+      const a = track[i - 1];
+      const b = track[i];
+      const k = (t - a[0]) / (b[0] - a[0]);
+      return [t, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+    }
+  }
+  return track[track.length - 1];
+};
+
+const ease = (x) => {
+  const c = Math.max(0, Math.min(1, x));
+  return c * c * (3 - 2 * c);
+};
+
+export default function ReplayedLanding({
+  videoSrc = "./crowd-loop.mp4",
+  studentHref = "/login/student",
+  teacherHref = "/login/teacher",
+} = {}) {
   const navigate = useNavigate();
-  const { demoLogin } = useAuth();
+  const videoRef = useRef(null);
+  const crowdRef = useRef(null);
+  const litRef = useRef(null);
+  const coneRef = useRef(null);
+  const poolRef = useRef(null);
+  const lampRef = useRef(null);
+  const brandRef = useRef(null);
+  const tagRef = useRef(null);
+  const loginsRef = useRef(null);
 
-  const handleLaunchStudent = () => {
-    demoLogin(ROLES.STUDENT);
-    navigate('/student');
-  };
+  useEffect(() => {
+    const v = videoRef.current;
+    const crowd = crowdRef.current;
+    if (!v || !crowd) return;
 
-  const handleLaunchTrainer = () => {
-    demoLogin(ROLES.TEACHER);
-    navigate('/teacher');
-  };
+    let hero = null;
+    let pan = 0.5;
+    let prevT = 0;
+    let brandDone = false;
+    let raf = 0;
+    const timers = [];
+
+    const metrics = () => {
+      const r = crowd.getBoundingClientRect();
+      const s = Math.max(r.width / VW, r.height / VH);
+      return { r, s, slack: r.width - VW * s };
+    };
+
+    const chooseHero = () => {
+      hero = Math.random() < 0.5 ? "A" : "B";
+      const m = metrics();
+      const tr = TRACKS[hero];
+      const mid = tr[Math.floor(tr.length / 2)][1];
+      // on narrow screens the video is cropped: slide it so this person is in view
+      pan = m.slack === 0 ? 0.5 : Math.max(0, Math.min(1, (m.r.width / 2 - mid * m.s) / m.slack));
+      v.style.objectPosition = `${pan * 100}% 100%`;
+    };
+
+    const revealBrandAndLogins = () => {
+      if (!brandDone) {
+        brandDone = true;
+        timers.push(
+          setTimeout(() => {
+            brandRef.current?.classList.add("rp-on");
+            tagRef.current?.classList.add("rp-on");
+          }, 300)
+        );
+        timers.push(
+          setTimeout(() => {
+            loginsRef.current?.classList.add("rp-on");
+          }, 800)
+        );
+      }
+    };
+
+    const frame = () => {
+      const t = v.currentTime;
+      if (t < prevT - 0.5 || hero === null) chooseHero(); // loop restarted
+      prevT = t;
+      const a = ease((t - 0.15) / 0.7) * (1 - ease((t - (END - 0.7)) / 0.65));
+
+      if (!v.paused && a > 0.01 && hero) {
+        const m = metrics();
+        const p = at(TRACKS[hero], t);
+        const s = m.s;
+        const x = m.r.left + m.slack * pan + p[1] * s;
+        const y = m.r.top + (m.r.height - VH * s) + p[2] * s;
+        const cw = Math.max(120, 230 * s);
+        const pw = 150 * s;
+        const ph = 235 * s;
+        const cone = coneRef.current;
+        const pool = poolRef.current;
+        const lamp = lampRef.current;
+        if (cone && pool && lamp) {
+          cone.style.left = `${x - cw / 2}px`;
+          cone.style.width = `${cw}px`;
+          cone.style.height = `${Math.max(40, y - 125 * s)}px`;
+          pool.style.left = `${x - pw / 2}px`;
+          pool.style.width = `${pw}px`;
+          pool.style.height = `${ph}px`;
+          pool.style.top = `${y - ph / 2 - 5 * s}px`;
+          lamp.style.left = `${x - 35}px`;
+        }
+        if (a > 0.6 && !brandDone) {
+          brandDone = true;
+          timers.push(
+            setTimeout(() => {
+              brandRef.current?.classList.add("rp-on");
+              tagRef.current?.classList.add("rp-on");
+            }, 900),
+          );
+          timers.push(setTimeout(() => loginsRef.current?.classList.add("rp-on"), 2300));
+        }
+      }
+      if (litRef.current) litRef.current.style.opacity = String(a);
+      raf = requestAnimationFrame(frame);
+    };
+
+    const start = () => {
+      v.play().catch(() => {});
+    };
+    const onPause = () => {
+      if (!document.hidden) start();
+    };
+    const onVis = () => {
+      if (!document.hidden) start();
+    };
+    const onResize = () => {
+      if (hero) chooseHero();
+    };
+    const onError = () => {
+      revealBrandAndLogins();
+    };
+
+    // Fallback: If video does not play or load within 1.2s, gracefully reveal branding and logins
+    const fallbackTimer = setTimeout(() => {
+      revealBrandAndLogins();
+    }, 1200);
+    timers.push(fallbackTimer);
+
+    v.addEventListener("pause", onPause);
+    v.addEventListener("error", onError);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("resize", onResize);
+    start();
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+      v.removeEventListener("pause", onPause);
+      v.removeEventListener("error", onError);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans selection:bg-zinc-800 selection:text-white">
-      {/* ========================================================
-          PUBLIC HEADER
-          ======================================================== */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Logo variant="light" size="sm" subtitle="Adaptive Learning Platform" />
+    <div className="relative h-screen w-full overflow-hidden bg-[#f6f6f6] text-[#0d0d0d]">
+      <style>{`
+        .rp-brand{opacity:0;transform:translateY(-14px) scale(.92);transition:opacity 1s,transform 1s}
+        .rp-tag{opacity:0;transform:scale(.96);transition:opacity 1s .3s,transform 1s .3s}
+        .rp-logins{opacity:0;transform:translateY(14px);visibility:hidden;transition:opacity 1s,transform 1s}
+        .rp-brand.rp-on,.rp-tag.rp-on,.rp-logins.rp-on{opacity:1;transform:none}
+        .rp-logins.rp-on{visibility:visible;pointer-events:auto}
+      `}</style>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-zinc-400">
-            <a href="#features" className="hover:text-white transition">
-              Features
-            </a>
-            <a href="#how-it-works" className="hover:text-white transition">
-              How It Works
-            </a>
-            <button
-              onClick={handleLaunchStudent}
-              className="hover:text-white transition flex items-center gap-1.5"
-            >
-              <GraduationCap className="w-3.5 h-3.5" />
-              Student Portal
-            </button>
-            <button
-              onClick={handleLaunchTrainer}
-              className="hover:text-white transition flex items-center gap-1.5"
-            >
-              <Presentation className="w-3.5 h-3.5" />
-              Trainer Console
-            </button>
-            <button
-              onClick={() => {
-                demoLogin(ROLES.ADMIN);
-                navigate('/admin');
-              }}
-              className="hover:text-white transition flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Admin
-            </button>
-          </nav>
+      {/* crowd video: loops by itself, never pauses */}
+      <div
+        ref={crowdRef}
+        className="absolute inset-x-0 bottom-0 min-h-[230px]"
+        style={{
+          height: "min(46vh, calc(100vw * 414 / 1280 * 1.1))",
+          maskImage: "linear-gradient(to bottom, transparent 0, #000 14%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0, #000 14%)",
+        }}
+      >
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          muted
+          loop
+          autoPlay
+          playsInline
+          preload="auto"
+          className="h-full w-full object-cover"
+          style={{ objectPosition: "50% 100%" }}
+        />
+      </div>
 
-          {/* Direct Auth Action */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/login')}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={handleLaunchStudent}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200 transition shadow-sm"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ========================================================
-          HERO SECTION
-          ======================================================== */}
-      <section className="relative pt-20 pb-16 px-6 max-w-5xl mx-auto text-center">
-        {/* Subtle radial glow background */}
+      {/* spotlight that follows one phone-holder */}
+      <div ref={litRef} className="pointer-events-none absolute inset-0" style={{ opacity: 0 }}>
+        <div ref={lampRef} className="absolute top-0 z-[3] h-3.5 w-[70px] rounded-b-2xl bg-[#0d0d0d]" />
         <div
-          className="absolute inset-0 pointer-events-none -z-10"
+          ref={coneRef}
+          className="absolute top-0 z-[1]"
           style={{
+            clipPath: "polygon(44% 0, 56% 0, 100% 100%, 0 100%)",
             background:
-              'radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.07) 0%, rgba(10, 10, 10, 0) 70%)',
+              "linear-gradient(to bottom, rgba(255,205,70,.9), rgba(255,205,70,.6) 60%, rgba(255,205,70,.35))",
+            mixBlendMode: "multiply",
+            filter: "blur(2px)",
           }}
         />
+        <div
+          ref={poolRef}
+          className="absolute z-[1]"
+          style={{
+            borderRadius: "50%",
+            background:
+              "radial-gradient(ellipse at center, rgba(255,205,70,.95) 0, rgba(255,205,70,.8) 42%, rgba(255,205,70,0) 70%)",
+            mixBlendMode: "multiply",
+          }}
+        />
+      </div>
 
-        {/* Top Tagline Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/80 text-xs font-medium text-zinc-300 mb-6 shadow-inner">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Session Replay & Adaptive Assessment Engine</span>
+      {/* logo + huge tagline + logins */}
+      <div className="pointer-events-none absolute inset-x-0 top-[4.5vh] z-20 flex flex-col items-center gap-4 px-4 text-center">
+        <div ref={brandRef} className="rp-brand flex items-center gap-3">
+          <div className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-[#0d0d0d] shadow-lg">
+            <RotateCcw className="h-7 w-7 text-white" />
+          </div>
+          <span className="text-[clamp(1.9rem,5vw,2.6rem)] font-extrabold leading-none tracking-tight">ReplayEd</span>
         </div>
 
-        {/* Main Title */}
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1] mb-6">
-          Learn at your pace.
-          <br />
-          <span className="bg-gradient-to-r from-zinc-100 via-zinc-400 to-zinc-600 bg-clip-text text-transparent">
-            Prove it with every keystroke.
+        <h1
+          ref={tagRef}
+          className="rp-tag max-w-[20ch] text-balance uppercase leading-[.98] tracking-[-0.02em]"
+          style={{
+            fontFamily: '"Archivo Black", Impact, "Arial Black", system-ui, sans-serif',
+            fontWeight: 400,
+            fontSynthesis: "none",
+            fontSize: "clamp(2.3rem, min(5vw, 8vh), 3.9rem)",
+          }}
+        >
+          Don&apos;t be ordinary with other apps. Use{" "}
+          <span className="underline decoration-[.09em] underline-offset-[.08em]">ReplayEd</span> and be{" "}
+          <span
+            className="px-[.06em]"
+            style={{
+              background:
+                "linear-gradient(transparent 52%, rgb(255,205,70) 52%, rgb(255,205,70) 94%, transparent 94%)",
+            }}
+          >
+            extraordinary.
           </span>
         </h1>
 
-        {/* Subtitle */}
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 leading-relaxed mb-10">
-          ReplayEd empowers coding institutes with adaptive question paths, an isolated code sandbox,
-          and forensic typing replay that gives trainers evidence, not guesses.
-        </p>
-
-        {/* Dual Portal Launcher CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button
-            onClick={handleLaunchStudent}
-            className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-white text-zinc-950 text-sm font-bold hover:bg-zinc-200 transition shadow-lg shadow-white/5 active:scale-95"
+        <div ref={loginsRef} className="rp-logins pointer-events-none flex flex-wrap justify-center gap-3">
+          <a
+            href={studentHref}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(studentHref);
+            }}
+            className="flex items-center gap-2 rounded-full border-[1.5px] border-[#0d0d0d] bg-[#0d0d0d] px-7 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
           >
-            <GraduationCap className="w-4 h-4" />
-            <span>Launch Student Portal</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </button>
-
-          <button
-            onClick={handleLaunchTrainer}
-            className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-sm font-semibold border border-zinc-800 hover:border-zinc-700 transition shadow-sm active:scale-95"
+            <GraduationCap className="h-4 w-4" /> Student Login
+          </a>
+          <a
+            href={teacherHref}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(teacherHref);
+            }}
+            className="flex items-center gap-2 rounded-full border-[1.5px] border-[#0d0d0d] bg-white px-7 py-3 text-sm font-semibold text-[#0d0d0d] transition hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
           >
-            <Presentation className="w-4 h-4 text-zinc-400" />
-            <span>Launch Trainer Console</span>
-          </button>
+            <BookOpen className="h-4 w-4" /> Teacher Login
+          </a>
         </div>
-
-        {/* Quick Demo Credentials Reminder */}
-        <p className="mt-4 text-xs text-zinc-500">
-          Instant demo access available for both portals. No credit card required.
-        </p>
-      </section>
-
-      {/* ========================================================
-          SIGNATURE FEATURE TEASER: SESSION REPLAY PLAYER
-          ======================================================== */}
-      <section className="max-w-6xl mx-auto px-6 py-8">
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-6 mb-6 border-b border-zinc-800/80 gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                  Feature Spotlight
-                </span>
-              </div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">
-                Live Keystroke Replay & Forensic Integrity
-              </h2>
-            </div>
-
-            <button
-              onClick={handleLaunchTrainer}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800 transition"
-            >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Test Interactive Replay in Trainer Console</span>
-            </button>
-          </div>
-
-          {/* Interactive Replay Simulation Preview */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Code Window */}
-            <div className="lg:col-span-2 rounded-2xl border border-zinc-800 bg-[#0d0d10] p-4 font-mono text-xs">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-800 text-zinc-500">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                  <span className="ml-2 text-zinc-400">solution_lru_cache.py</span>
-                </div>
-                <div className="flex items-center gap-2 text-[11px]">
-                  <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300">
-                    Playback 1x
-                  </span>
-                  <span className="text-emerald-400 font-semibold">04:18 / 12:45</span>
-                </div>
-              </div>
-
-              {/* Code lines */}
-              <div className="space-y-1 text-zinc-300">
-                <div><span className="text-zinc-600 mr-3">01</span><span className="text-zinc-400">class</span> <span className="text-white font-bold">LRUCache</span>:</div>
-                <div><span className="text-zinc-600 mr-3">02</span>    <span className="text-zinc-400">def</span> <span className="text-white">__init__</span>(self, capacity: int):</div>
-                <div><span className="text-zinc-600 mr-3">03</span>        self.cap = capacity</div>
-                <div><span className="text-zinc-600 mr-3">04</span>        self.cache = {'{}'} <span className="text-zinc-500"># key to node mapping</span></div>
-                <div><span className="text-zinc-600 mr-3">05</span>        self.head = Node(0, 0)</div>
-                <div><span className="text-zinc-600 mr-3">06</span>        self.tail = Node(0, 0)</div>
-                <div><span className="text-zinc-600 mr-3">07</span>        self.head.next = self.tail</div>
-                <div><span className="text-zinc-600 mr-3">08</span>        self.tail.prev = self.head</div>
-                <div className="bg-zinc-800/60 -mx-4 px-4 py-0.5 border-l-2 border-emerald-400">
-                  <span className="text-zinc-600 mr-3">09</span>    <span className="text-zinc-400">def</span> <span className="text-white">get</span>(self, key: int) -&gt; int:
-                  <span className="inline-block w-1.5 h-3.5 bg-white ml-1 animate-pulse align-middle" />
-                </div>
-              </div>
-            </div>
-
-            {/* Anomaly & Integrity Log */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center justify-between">
-                  <span>Integrity Timeline</span>
-                  <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60">
-                    High Confidence
-                  </span>
-                </h3>
-
-                <div className="space-y-2.5 text-xs">
-                  <div className="flex items-start gap-2.5 p-2 rounded-xl bg-zinc-900 border border-zinc-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-semibold text-zinc-200">Normal typing cadence</div>
-                      <div className="text-[11px] text-zinc-500">00:00 - 02:40 • 74 WPM steady</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-2 rounded-xl bg-zinc-900 border border-zinc-800">
-                    <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-semibold text-zinc-200">Algorithmic think time</div>
-                      <div className="text-[11px] text-zinc-500">02:41 - 03:55 • 1m 14s pause</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-2 rounded-xl bg-zinc-900 border border-zinc-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-semibold text-zinc-200">Zero clipboard paste flags</div>
-                      <div className="text-[11px] text-zinc-500">All logic typed manually</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
-                <span>Verified Candidate</span>
-                <span className="font-bold text-white">Alex Chen (94%)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================
-          CORE FEATURES GRID
-          ======================================================== */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-            System Architecture
-          </span>
-          <h2 className="text-3xl font-bold text-white mt-1">
-            Built for rigorous coding assessments
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Feature 1 */}
-          <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white mb-4">
-              <Brain className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">
-              Adaptive Learning Paths
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Questions dynamically adjust difficulty based on real-time concept mastery, isolating
-              weak topics like Recursion, Dynamic Programming, and Concurrency.
-            </p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white mb-4">
-              <Activity className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">
-              Keystroke-by-Keystroke Replay
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Trainers scrub through full typing sessions with playback controls, inspecting thought
-              processes, deletions, hesitation pauses, and refactors.
-            </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white mb-4">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">
-              Forensic Integrity Signals
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Detect large external code pastes, rapid block insertions, tab unfocus events, and
-              unnatural typing cadence with automated anomaly flags.
-            </p>
-          </div>
-
-          {/* Feature 4 */}
-          <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white mb-4">
-              <Terminal className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">
-              Isolated Code Sandbox
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              In-browser code editor with syntax highlighting, language selector (Python, JS, C++),
-              custom test runner, and immediate execution output.
-            </p>
-          </div>
-
-          {/* Feature 5 */}
-          <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white mb-4">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">
-              Code Viva & Oral Verification
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Automated explanation questions testing why the student picked a specific data structure,
-              space/time trade-offs, and edge cases.
-            </p>
-          </div>
-
-          {/* Feature 6 */}
-          <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white mb-4">
-              <Layers className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">
-              Batch Mastery Heatmaps
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Institutes aggregate cohort data across batches to diagnose institute-wide weak concepts
-              and customize curriculum pacing.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================
-          HOW IT WORKS (STEP-BY-STEP)
-          ======================================================== */}
-      <section id="how-it-works" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800/80">
-        <div className="text-center mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-            Methodology
-          </span>
-          <h2 className="text-3xl font-bold text-white mt-1">
-            How Adaptive Learning Works
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="flex flex-col items-start p-6 rounded-2xl bg-zinc-950 border border-zinc-800">
-            <span className="text-xs font-mono font-bold text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded border border-zinc-700/60 mb-4">
-              STEP 01
-            </span>
-            <h4 className="text-base font-bold text-white mb-2">
-              Diagnostic Assessment
-            </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Student solves adaptive challenges. As tests pass or fail, the Bayesian knowledge tracer
-              calculates concept certainty.
-            </p>
-          </div>
-
-          <div className="flex flex-col items-start p-6 rounded-2xl bg-zinc-950 border border-zinc-800">
-            <span className="text-xs font-mono font-bold text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded border border-zinc-700/60 mb-4">
-              STEP 02
-            </span>
-            <h4 className="text-base font-bold text-white mb-2">
-              Targeted Concept Remediation
-            </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              The curriculum roadmap unlocks specific bridge modules addressing identified weak spots
-              before advancing to harder algorithms.
-            </p>
-          </div>
-
-          <div className="flex flex-col items-start p-6 rounded-2xl bg-zinc-950 border border-zinc-800">
-            <span className="text-xs font-mono font-bold text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded border border-zinc-700/60 mb-4">
-              STEP 03
-            </span>
-            <h4 className="text-base font-bold text-white mb-2">
-              Trainer Verification & Viva
-            </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Trainer reviews keystroke replays and grades the code explanation answers to verify genuine
-              hands-on programming competency.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================
-          PUBLIC FOOTER
-          ======================================================== */}
-      <footer className="border-t border-zinc-800/80 bg-zinc-950/80 py-10 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
-          <div className="flex items-center gap-3">
-            <Logo variant="light" size="sm" showText={true} />
-            <span>&copy; {new Date().getFullYear()} ReplayEd Inc. Adaptive Coding & Assessment Engine.</span>
-          </div>
-
-          <div className="flex items-center gap-4 font-semibold text-zinc-400">
-            <button onClick={handleLaunchStudent} className="hover:text-white transition">
-              Student Portal
-            </button>
-            <button onClick={handleLaunchTrainer} className="hover:text-white transition">
-              Trainer Console
-            </button>
-            <button onClick={() => navigate('/login')} className="hover:text-white transition">
-              Sign In
-            </button>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
